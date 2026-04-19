@@ -1,3 +1,1 @@
-import { cometDash } from "./comet-dash.js";
-
-export const games = [cometDash];
+window.MiniGameWorkshopGames = [window.cometDash, window.mooMission].filter(Boolean);

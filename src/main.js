@@ -1,5 +1,3 @@
-import { games } from "./games/index.js";
-
 const elements = {
   best: document.querySelector("#best-value"),
   controls: document.querySelector("#game-controls"),
@@ -14,6 +12,7 @@ const elements = {
   canvas: document.querySelector("#game-canvas"),
 };
 
+const games = window.MiniGameWorkshopGames || [];
 let activeGameHandle = null;
 let activeGameId = null;
 
@@ -73,4 +72,10 @@ function loadGame(gameId) {
 }
 
 renderCatalog();
-loadGame(games[0].id);
+if (games[0]) {
+  loadGame(games[0].id);
+} else {
+  elements.statusPill.textContent = "LOAD FAILED";
+  elements.statusText.textContent = "脚本没有正确初始化。";
+  elements.hint.textContent = "请刷新页面，或改用部署后的在线地址访问。";
+}

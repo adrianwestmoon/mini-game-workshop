@@ -7,7 +7,7 @@
 ## 现在有什么
 
 - 一个风格化的小游戏工作台首页
-- 一个可玩的 Canvas 示例游戏 `Comet Dash`
+- 两个可玩的 Canvas 示例游戏 `Comet Dash` 和 `Moo Mission`
 - 可扩展的 `src/games/` 目录结构，方便继续加新游戏
 - 一个内置静态服务器 `serve.mjs`
 
@@ -41,6 +41,7 @@ index.html
 └── src
     ├── games
     │   ├── comet-dash.js
+    │   ├── moo-mission.js
     │   └── index.js
     └── main.js
 ```
@@ -49,10 +50,15 @@ index.html
 
 `Comet Dash`
 
-- 方向键 / `WASD` 控制飞船移动
-- 收集发光碎片得分
-- 躲开坠落陨石
-- 游戏结束后按 `Space` 或 `Enter` 重新开始
+- 拖动飞船或用键盘移动
+- 自动射击，击落敌机并吃强化
+- 带音效、爆炸粒子和命中反馈
+
+`Moo Mission`
+
+- 以小牛露娜为主角的横版闯关
+- 收集四叶草后打开终点门
+- 支持键盘和底部触控按钮
 
 ## 后续怎么加新游戏
 
