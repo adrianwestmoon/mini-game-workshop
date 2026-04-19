@@ -1,0 +1,290 @@
+:root {
+  --bg: #09111f;
+  --bg-soft: #13213a;
+  --panel: rgba(7, 15, 31, 0.76);
+  --panel-border: rgba(123, 225, 255, 0.2);
+  --text: #f4f7fb;
+  --muted: #a7bfd2;
+  --warm: #ff875f;
+  --cool: #66e7ff;
+  --lime: #d4ff5d;
+  --shadow: 0 24px 80px rgba(3, 8, 20, 0.45);
+  --radius-lg: 28px;
+  --radius-md: 18px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  font-family: "Avenir Next", "Trebuchet MS", "Segoe UI", sans-serif;
+  color: var(--text);
+  background:
+    radial-gradient(circle at top, rgba(102, 231, 255, 0.2), transparent 28%),
+    radial-gradient(circle at 80% 20%, rgba(255, 135, 95, 0.18), transparent 22%),
+    linear-gradient(160deg, #06101d 0%, #101e36 48%, #09111f 100%);
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 36px 36px;
+  mask-image: radial-gradient(circle at center, black 45%, transparent 100%);
+  pointer-events: none;
+}
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(circle at 30% 30%, rgba(212, 255, 93, 0.06), transparent 18%),
+    radial-gradient(circle at 70% 70%, rgba(102, 231, 255, 0.08), transparent 20%);
+  filter: blur(8px);
+  pointer-events: none;
+}
+
+.shell {
+  position: relative;
+  width: min(1400px, calc(100vw - 32px));
+  margin: 0 auto;
+  padding: 28px 0 40px;
+}
+
+.hero,
+.panel,
+.stage-panel {
+  backdrop-filter: blur(18px);
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  box-shadow: var(--shadow);
+}
+
+.hero {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 28px;
+  border-radius: var(--radius-lg);
+  margin-bottom: 22px;
+}
+
+.eyebrow,
+.stage-label,
+.footer-label,
+.info-label {
+  margin: 0 0 8px;
+  color: var(--cool);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+}
+
+.hero h1 {
+  margin: 0;
+  font-family: "Futura", "Avenir Next Condensed", "Trebuchet MS", sans-serif;
+  font-size: clamp(2.3rem, 4vw, 4.5rem);
+  line-height: 0.95;
+}
+
+.hero-copy {
+  margin: 14px 0 0;
+  max-width: 720px;
+  color: var(--muted);
+  font-size: 1.05rem;
+  line-height: 1.65;
+}
+
+.status-pill,
+.chip {
+  align-self: flex-start;
+  border-radius: 999px;
+  padding: 10px 16px;
+  background: linear-gradient(120deg, rgba(102, 231, 255, 0.2), rgba(255, 135, 95, 0.24));
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: white;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.78rem;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr) 320px;
+  gap: 22px;
+}
+
+.panel,
+.stage-panel {
+  border-radius: var(--radius-lg);
+  padding: 22px;
+}
+
+.panel-head,
+.stage-head,
+.footer-bar,
+.hud {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.game-list {
+  display: grid;
+  gap: 12px;
+  margin: 16px 0 22px;
+}
+
+.game-card {
+  width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: linear-gradient(180deg, rgba(25, 40, 72, 0.8), rgba(12, 24, 46, 0.95));
+  color: var(--text);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.game-card:hover,
+.game-card.is-active {
+  transform: translateY(-2px);
+  border-color: rgba(102, 231, 255, 0.45);
+  box-shadow: 0 18px 45px rgba(102, 231, 255, 0.16);
+}
+
+.game-card-title {
+  display: block;
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.game-card-copy,
+.panel-note p,
+#game-description,
+#status-text,
+#hint-text {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.panel-note {
+  padding: 16px;
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.panel-note h2,
+.stage-head h2 {
+  margin: 0 0 8px;
+}
+
+.stage-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.hud {
+  flex-wrap: wrap;
+  color: var(--muted);
+}
+
+.hud strong {
+  color: var(--text);
+  margin-left: 4px;
+}
+
+.canvas-frame {
+  position: relative;
+  min-height: 420px;
+  border-radius: calc(var(--radius-lg) - 8px);
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background:
+    radial-gradient(circle at top, rgba(102, 231, 255, 0.08), transparent 30%),
+    linear-gradient(180deg, rgba(5, 10, 21, 0.98), rgba(10, 17, 31, 0.95));
+}
+
+#game-canvas {
+  width: 100%;
+  height: 100%;
+  min-height: 420px;
+  display: block;
+}
+
+.footer-bar {
+  padding: 16px 18px;
+  border-radius: calc(var(--radius-lg) - 8px);
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.info-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.info-block {
+  padding: 16px;
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.info-list {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+@media (max-width: 1120px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .canvas-frame,
+  #game-canvas {
+    min-height: 360px;
+  }
+}
+
+@media (max-width: 720px) {
+  .shell {
+    width: min(100vw - 20px, 1400px);
+    padding-top: 18px;
+  }
+
+  .hero,
+  .panel,
+  .stage-panel {
+    padding: 18px;
+  }
+
+  .hero {
+    flex-direction: column;
+  }
+
+  .stage-head,
+  .footer-bar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

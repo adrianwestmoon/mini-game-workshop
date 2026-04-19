@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mini Game Workshop</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="backdrop"></div>
+    <div class="shell">
+      <header class="hero">
+        <div>
+          <p class="eyebrow">MINI GAME WORKSHOP</p>
+          <h1>小游戏开发专用项目</h1>
+          <p class="hero-copy">
+            先把玩法跑起来，再慢慢打磨表现。这里是我们的试玩台、灵感板和可扩展骨架。
+          </p>
+        </div>
+        <div class="status-pill" id="status-pill">READY TO BUILD</div>
+      </header>
+
+      <main class="layout">
+        <section class="panel catalog-panel">
+          <div class="panel-head">
+            <span>游戏列表</span>
+            <span class="chip">Prototype Hub</span>
+          </div>
+          <div id="game-list" class="game-list"></div>
+          <div class="panel-note">
+            <h2>开发节奏</h2>
+            <p>先做一个玩法最小闭环，再往里加美术、音效、关卡和结算循环。</p>
+          </div>
+        </section>
+
+        <section class="stage-panel">
+          <div class="stage-head">
+            <div>
+              <p class="stage-label">当前试玩</p>
+              <h2 id="game-title">Comet Dash</h2>
+            </div>
+            <div class="hud" id="hud">
+              <span>Score <strong id="score-value">0</strong></span>
+              <span>Lives <strong id="lives-value">3</strong></span>
+              <span>Best <strong id="best-value">0</strong></span>
+            </div>
+          </div>
+
+          <div class="canvas-frame">
+            <canvas id="game-canvas" aria-label="小游戏画布"></canvas>
+          </div>
+
+          <div class="footer-bar">
+            <div>
+              <p class="footer-label">状态</p>
+              <p id="status-text">加载中...</p>
+            </div>
+            <div>
+              <p class="footer-label">提示</p>
+              <p id="hint-text">准备启动。</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel info-panel">
+          <div class="panel-head">
+            <span>玩法信息</span>
+            <span class="chip">Design Notes</span>
+          </div>
+          <div class="info-block">
+            <p class="info-label">玩法概述</p>
+            <p id="game-description"></p>
+          </div>
+          <div class="info-block">
+            <p class="info-label">操作方式</p>
+            <ul id="game-controls" class="info-list"></ul>
+          </div>
+          <div class="info-block">
+            <p class="info-label">下一步建议</p>
+            <ul class="info-list">
+              <li>加入第二个原型，验证项目扩展方式。</li>
+              <li>补音效与粒子，让反馈更有手感。</li>
+              <li>增加开始界面、暂停和结算页。</li>
+            </ul>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
