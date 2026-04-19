@@ -7,7 +7,7 @@
 ## 现在有什么
 
 - 一个风格化的小游戏工作台首页
-- 两个可玩的 Canvas 示例游戏 `Comet Dash` 和 `Moo Mission`
+- 三个可玩的 Canvas 示例游戏 `Comet Dash`、`Moo Mission` 和 `恶人谷黑店`
 - 可扩展的 `src/games/` 目录结构，方便继续加新游戏
 - 一个内置静态服务器 `serve.mjs`
 
@@ -41,6 +41,7 @@ index.html
 └── src
     ├── games
     │   ├── comet-dash.js
+    │   ├── evil-valley-inn.js
     │   ├── moo-mission.js
     │   └── index.js
     └── main.js
@@ -59,6 +60,12 @@ index.html
 - 以小牛露娜为主角的横版闯关
 - 收集四叶草后打开终点门
 - 支持键盘和底部触控按钮
+
+`恶人谷黑店`
+
+- 以金声为主角的俯视角闯关动作 demo
+- 对抗喷火岳、需求仙师、荔枝头陀并救出阿凯小牛
+- 三个房间三种机制，收集线索后解锁出口
 
 ## 后续怎么加新游戏
 
