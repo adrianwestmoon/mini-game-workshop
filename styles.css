@@ -161,6 +161,49 @@ body::before {
   line-height: 1.78;
 }
 
+.hero-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 22px;
+  max-width: 760px;
+}
+
+.hero-stat {
+  padding: 14px 16px;
+  border-radius: 20px;
+  background:
+    radial-gradient(circle at top right, rgba(255, 214, 107, 0.1), transparent 38%),
+    rgba(255, 255, 255, 0.045);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.hero-stat-label,
+.hero-ribbon-title {
+  display: block;
+  color: rgba(102, 231, 255, 0.88);
+  font-size: 0.68rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.hero-stat-value {
+  display: block;
+  margin-top: 6px;
+  font-size: 1.35rem;
+  letter-spacing: -0.04em;
+}
+
+.hero-stat-copy,
+.hero-ribbon-copy,
+.stage-subtitle {
+  display: block;
+  margin-top: 6px;
+  color: var(--muted);
+  line-height: 1.55;
+  font-size: 0.9rem;
+}
+
 .build-meta {
   margin: 18px 0 0;
   color: rgba(212, 255, 93, 0.88);
@@ -211,6 +254,14 @@ body::before {
   transform: translateY(-1px);
   filter: brightness(1.04);
   box-shadow: 0 18px 38px rgba(102, 231, 255, 0.28);
+}
+
+.hero-ribbon {
+  max-width: 280px;
+  padding: 14px 16px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .layout {
@@ -316,6 +367,13 @@ body::before {
   border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
+.panel-note-alt {
+  margin-top: 14px;
+  background:
+    radial-gradient(circle at top left, rgba(102, 231, 255, 0.12), transparent 34%),
+    rgba(255, 255, 255, 0.03);
+}
+
 .panel-note h2,
 .stage-head h2 {
   margin: 0 0 8px;
@@ -356,6 +414,11 @@ body::before {
   letter-spacing: -0.04em;
 }
 
+.stage-subtitle {
+  margin-top: 4px;
+  max-width: 480px;
+}
+
 .canvas-frame {
   position: relative;
   min-height: 420px;
@@ -381,6 +444,67 @@ body::before {
   pointer-events: none;
   mix-blend-mode: screen;
   opacity: 0.35;
+}
+
+.canvas-corners {
+  position: absolute;
+  inset: 14px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.canvas-corners span {
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  border-color: rgba(255, 255, 255, 0.2);
+  border-style: solid;
+}
+
+.canvas-corners span:nth-child(1) {
+  top: 0;
+  left: 0;
+  border-width: 2px 0 0 2px;
+}
+
+.canvas-corners span:nth-child(2) {
+  top: 0;
+  right: 0;
+  border-width: 2px 2px 0 0;
+}
+
+.canvas-corners span:nth-child(3) {
+  bottom: 0;
+  left: 0;
+  border-width: 0 0 2px 2px;
+}
+
+.canvas-corners span:nth-child(4) {
+  right: 0;
+  bottom: 0;
+  border-width: 0 2px 2px 0;
+}
+
+.canvas-badges {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.canvas-badge {
+  padding: 7px 10px;
+  border-radius: 999px;
+  background: rgba(7, 17, 33, 0.64);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 250, 240, 0.92);
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
 }
 
 #game-canvas {
@@ -478,6 +602,12 @@ body::before {
   border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
+.info-block-accent {
+  background:
+    radial-gradient(circle at top right, rgba(255, 214, 107, 0.12), transparent 38%),
+    rgba(255, 255, 255, 0.035);
+}
+
 .info-list {
   margin: 0;
   padding-left: 18px;
@@ -551,6 +681,33 @@ body::before {
   font-size: 0.9rem;
 }
 
+.story-rail {
+  display: grid;
+  gap: 10px;
+}
+
+.story-rail span {
+  position: relative;
+  padding: 12px 14px 12px 22px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.035);
+  color: var(--text);
+  font-size: 0.92rem;
+}
+
+.story-rail span::before {
+  content: "";
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  transform: translateY(-50%);
+  background: linear-gradient(180deg, var(--gold), var(--cool));
+  box-shadow: 0 0 0 6px rgba(102, 231, 255, 0.08);
+}
+
 @media (max-width: 1120px) {
   .layout {
     grid-template-columns: 1fr;
@@ -583,6 +740,10 @@ body::before {
     align-items: stretch;
   }
 
+  .hero-stats {
+    grid-template-columns: 1fr;
+  }
+
   .stage-head,
   .footer-bar {
     flex-direction: column;
@@ -600,5 +761,10 @@ body::before {
 
   .hud {
     justify-content: flex-start;
+  }
+
+  .canvas-badges {
+    right: 16px;
+    left: 16px;
   }
 }

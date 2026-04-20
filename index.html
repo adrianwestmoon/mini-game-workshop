@@ -7,7 +7,7 @@
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
     <title>Mini Game Workshop</title>
-    <link rel="stylesheet" href="./styles.css?v=20260420-ui-polish" />
+    <link rel="stylesheet" href="./styles.css?v=20260420-ui-grand" />
   </head>
   <body>
     <div class="backdrop"></div>
@@ -19,11 +19,32 @@
           <p class="hero-copy">
             先把玩法跑起来，再慢慢打磨表现。这里是我们的试玩台、灵感板和可扩展骨架。
           </p>
-          <p class="build-meta">当前构建 <strong id="build-version">2026.04.20-ui-polish</strong></p>
+          <div class="hero-stats">
+            <div class="hero-stat">
+              <span class="hero-stat-label">Playable</span>
+              <strong class="hero-stat-value">5</strong>
+              <span class="hero-stat-copy">小游戏原型已接入</span>
+            </div>
+            <div class="hero-stat">
+              <span class="hero-stat-label">Campaign</span>
+              <strong class="hero-stat-value">5 CH</strong>
+              <span class="hero-stat-copy">五章主线已串接</span>
+            </div>
+            <div class="hero-stat">
+              <span class="hero-stat-label">Runtime</span>
+              <strong class="hero-stat-value">STATIC</strong>
+              <span class="hero-stat-copy">零依赖网页工程</span>
+            </div>
+          </div>
+          <p class="build-meta">当前构建 <strong id="build-version">2026.04.20-ui-grand</strong></p>
         </div>
         <div class="hero-actions">
           <button class="campaign-button" id="campaign-button" type="button">开始剧情模式</button>
           <div class="status-pill" id="status-pill">READY TO BUILD</div>
+          <div class="hero-ribbon">
+            <span class="hero-ribbon-title">Worldline</span>
+            <span class="hero-ribbon-copy">牧场 -> 黑店 -> 月夜法阵 -> 奶龙擂台 -> 裂口追击</span>
+          </div>
         </div>
       </header>
 
@@ -38,6 +59,10 @@
             <h2>开发节奏</h2>
             <p>先做一个玩法最小闭环，再往里加美术、音效、关卡和结算循环。</p>
           </div>
+          <div class="panel-note panel-note-alt">
+            <h2>世界线路</h2>
+            <p>先从角色、目标和冲突搭出骨架，再把每一关做成真正能承接剧情的玩法节点。</p>
+          </div>
         </section>
 
         <section class="stage-panel">
@@ -45,6 +70,7 @@
             <div>
               <p class="stage-label">当前试玩</p>
               <h2 id="game-title">Comet Dash</h2>
+              <p class="stage-subtitle">剧情模式与自由试玩共用同一套即时舞台。</p>
             </div>
             <div class="hud" id="hud">
               <span>Score <strong id="score-value">0</strong></span>
@@ -54,6 +80,17 @@
           </div>
 
           <div class="canvas-frame">
+            <div class="canvas-corners">
+              <span></span>
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+            <div class="canvas-badges">
+              <span class="canvas-badge">Arcade Canvas</span>
+              <span class="canvas-badge">Narrative Route</span>
+              <span class="canvas-badge">Touch Ready</span>
+            </div>
             <canvas id="game-canvas" aria-label="小游戏画布"></canvas>
             <div class="story-overlay is-hidden" id="story-overlay">
               <div class="story-card">
@@ -97,6 +134,16 @@
             <p class="info-label">剧情模式</p>
             <div id="campaign-progress" class="campaign-progress"></div>
           </div>
+          <div class="info-block info-block-accent">
+            <p class="info-label">主线概览</p>
+            <div class="story-rail">
+              <span>牧场找牛</span>
+              <span>黑店取证</span>
+              <span>封印月夜</span>
+              <span>擂台决斗</span>
+              <span>裂口追击</span>
+            </div>
+          </div>
           <div class="info-block">
             <p class="info-label">下一步建议</p>
             <ul class="info-list">
@@ -109,12 +156,12 @@
       </main>
     </div>
 
-    <script src="./src/games/comet-dash.js?v=20260420-ui-polish" defer></script>
-    <script src="./src/games/moo-mission.js?v=20260420-ui-polish" defer></script>
-    <script src="./src/games/evil-valley-inn.js?v=20260420-ui-polish" defer></script>
-    <script src="./src/games/owl-magician.js?v=20260420-ui-polish" defer></script>
-    <script src="./src/games/milk-dragon-brawl.js?v=20260420-ui-polish" defer></script>
-    <script src="./src/games/index.js?v=20260420-ui-polish" defer></script>
-    <script src="./src/main.js?v=20260420-ui-polish" defer></script>
+    <script src="./src/games/comet-dash.js?v=20260420-ui-grand" defer></script>
+    <script src="./src/games/moo-mission.js?v=20260420-ui-grand" defer></script>
+    <script src="./src/games/evil-valley-inn.js?v=20260420-ui-grand" defer></script>
+    <script src="./src/games/owl-magician.js?v=20260420-ui-grand" defer></script>
+    <script src="./src/games/milk-dragon-brawl.js?v=20260420-ui-grand" defer></script>
+    <script src="./src/games/index.js?v=20260420-ui-grand" defer></script>
+    <script src="./src/main.js?v=20260420-ui-grand" defer></script>
   </body>
 </html>
