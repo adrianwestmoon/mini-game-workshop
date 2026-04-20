@@ -1,5 +1,8 @@
+const APP_BUILD = "2026.04.20-inn2";
+
 const elements = {
   best: document.querySelector("#best-value"),
+  buildVersion: document.querySelector("#build-version"),
   controls: document.querySelector("#game-controls"),
   description: document.querySelector("#game-description"),
   gameList: document.querySelector("#game-list"),
@@ -15,6 +18,10 @@ const elements = {
 const games = window.MiniGameWorkshopGames || [];
 let activeGameHandle = null;
 let activeGameId = null;
+
+if (elements.buildVersion) {
+  elements.buildVersion.textContent = APP_BUILD;
+}
 
 function renderCatalog() {
   elements.gameList.innerHTML = "";

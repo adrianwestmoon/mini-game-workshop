@@ -105,6 +105,18 @@ body::before {
   line-height: 1.65;
 }
 
+.build-meta {
+  margin: 14px 0 0;
+  color: rgba(212, 255, 93, 0.88);
+  font-size: 0.92rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.build-meta strong {
+  color: #ffffff;
+}
+
 .status-pill,
 .chip {
   align-self: flex-start;
