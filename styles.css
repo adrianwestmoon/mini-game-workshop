@@ -112,10 +112,10 @@ body::before {
 }
 
 .hero {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr) minmax(220px, 0.42fr);
   gap: 24px;
-  align-items: flex-end;
+  align-items: stretch;
   padding: 34px 32px 30px;
   border-radius: 34px;
   margin-bottom: 22px;
@@ -125,10 +125,17 @@ body::before {
     linear-gradient(135deg, rgba(9, 19, 41, 0.98), rgba(11, 22, 47, 0.88) 52%, rgba(23, 18, 33, 0.9));
 }
 
+.hero-main {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
 .hero-actions {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
+  justify-content: space-between;
   gap: 12px;
 }
 
@@ -262,6 +269,64 @@ body::before {
   border-radius: 20px;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.hero-art-card {
+  position: relative;
+  margin: 0;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 26px;
+  background:
+    radial-gradient(circle at top right, rgba(102, 231, 255, 0.12), transparent 32%),
+    rgba(255, 255, 255, 0.045);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 18px 50px rgba(4, 12, 28, 0.28);
+}
+
+.hero-art-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 38%, rgba(6, 12, 24, 0.16) 62%, rgba(6, 12, 24, 0.82));
+  pointer-events: none;
+}
+
+.hero-art-image {
+  width: 100%;
+  height: 100%;
+  min-height: 340px;
+  display: block;
+  object-fit: cover;
+  object-position: center;
+}
+
+.hero-art-caption {
+  position: absolute;
+  inset: auto 18px 18px 18px;
+  z-index: 1;
+  display: grid;
+  gap: 8px;
+}
+
+.hero-art-kicker {
+  color: rgba(102, 231, 255, 0.92);
+  font-size: 0.68rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.hero-art-caption strong {
+  font-size: 1.08rem;
+  line-height: 1.35;
+}
+
+.hero-art-caption span:last-child {
+  color: rgba(244, 247, 251, 0.8);
+  line-height: 1.55;
+  font-size: 0.88rem;
 }
 
 .layout {
@@ -507,6 +572,30 @@ body::before {
   text-transform: uppercase;
 }
 
+.canvas-corners span:nth-child(1) {
+  top: 0;
+  left: 0;
+  border-width: 2px 0 0 2px;
+}
+
+.canvas-corners span:nth-child(2) {
+  top: 0;
+  right: 0;
+  border-width: 2px 2px 0 0;
+}
+
+.canvas-corners span:nth-child(3) {
+  bottom: 0;
+  left: 0;
+  border-width: 0 0 2px 2px;
+}
+
+.canvas-corners span:nth-child(4) {
+  right: 0;
+  bottom: 0;
+  border-width: 0 2px 2px 0;
+}
+
 #game-canvas {
   width: 100%;
   height: 100%;
@@ -542,6 +631,50 @@ body::before {
     linear-gradient(160deg, rgba(8, 16, 34, 0.94), rgba(11, 24, 46, 0.96));
   border: 1px solid rgba(151, 227, 255, 0.24);
   box-shadow: 0 26px 70px rgba(2, 7, 18, 0.42);
+}
+
+.story-art {
+  position: relative;
+  margin: -6px -6px 18px;
+  overflow: hidden;
+  border-radius: 20px;
+  min-height: 180px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.story-art::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(8, 14, 28, 0.08), rgba(8, 14, 28, 0.7));
+}
+
+.story-art img {
+  width: 100%;
+  height: 180px;
+  display: block;
+  object-fit: cover;
+  object-position: center;
+}
+
+.story-art-copy {
+  position: absolute;
+  inset: auto 16px 16px 16px;
+  z-index: 1;
+  display: grid;
+  gap: 4px;
+}
+
+.story-art-copy span {
+  color: rgba(102, 231, 255, 0.92);
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.story-art-copy strong {
+  font-size: 1rem;
+  line-height: 1.35;
 }
 
 .story-kicker,
@@ -708,7 +841,40 @@ body::before {
   box-shadow: 0 0 0 6px rgba(102, 231, 255, 0.08);
 }
 
+.concept-card {
+  display: grid;
+  gap: 14px;
+}
+
+.concept-card img {
+  width: 100%;
+  display: block;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 18px 42px rgba(3, 8, 20, 0.24);
+}
+
+.concept-card p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.65;
+}
+
 @media (max-width: 1120px) {
+  .hero {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-actions {
+    align-items: flex-start;
+  }
+
+  .hero-ribbon {
+    max-width: none;
+  }
+
   .layout {
     grid-template-columns: 1fr;
   }
@@ -732,16 +898,15 @@ body::before {
   }
 
   .hero {
-    flex-direction: column;
     border-radius: 28px;
-  }
-
-  .hero-actions {
-    align-items: stretch;
   }
 
   .hero-stats {
     grid-template-columns: 1fr;
+  }
+
+  .hero-art-image {
+    min-height: 250px;
   }
 
   .stage-head,

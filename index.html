@@ -7,13 +7,13 @@
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
     <title>Mini Game Workshop</title>
-    <link rel="stylesheet" href="./styles.css?v=20260420-ui-grand" />
+    <link rel="stylesheet" href="./styles.css?v=20260420-art-integrated" />
   </head>
   <body>
     <div class="backdrop"></div>
     <div class="shell">
       <header class="hero">
-        <div>
+        <div class="hero-main">
           <p class="eyebrow">MINI GAME WORKSHOP</p>
           <h1>小游戏开发专用项目</h1>
           <p class="hero-copy">
@@ -36,8 +36,20 @@
               <span class="hero-stat-copy">零依赖网页工程</span>
             </div>
           </div>
-          <p class="build-meta">当前构建 <strong id="build-version">2026.04.20-ui-grand</strong></p>
+          <p class="build-meta">当前构建 <strong id="build-version">2026.04.20-art-integrated</strong></p>
         </div>
+        <figure class="hero-art-card">
+          <img
+            class="hero-art-image"
+            src="./assets/art/worldline-concept.png?v=20260420-art-integrated"
+            alt="金声、阿凯小牛、猫头鹰与奶龙的世界观原画"
+          />
+          <figcaption class="hero-art-caption">
+            <span class="hero-art-kicker">World Concept Art</span>
+            <strong>把这一组角色关系和世界观，真正接成了项目主视觉。</strong>
+            <span>首页、剧情模式和后续章节过场都会沿着这张原画的叙事方向继续长。</span>
+          </figcaption>
+        </figure>
         <div class="hero-actions">
           <button class="campaign-button" id="campaign-button" type="button">开始剧情模式</button>
           <div class="status-pill" id="status-pill">READY TO BUILD</div>
@@ -94,6 +106,16 @@
             <canvas id="game-canvas" aria-label="小游戏画布"></canvas>
             <div class="story-overlay is-hidden" id="story-overlay">
               <div class="story-card">
+                <div class="story-art">
+                  <img
+                    src="./assets/art/worldline-concept.png?v=20260420-art-integrated"
+                    alt="剧情模式世界观原画"
+                  />
+                  <div class="story-art-copy">
+                    <span>Chapter Visual</span>
+                    <strong>世界观原画已接入剧情模式</strong>
+                  </div>
+                </div>
                 <p class="story-kicker" id="story-kicker">剧情模式</p>
                 <h3 class="story-title" id="story-title">第一章</h3>
                 <p class="story-speaker" id="story-speaker">旁白</p>
@@ -144,6 +166,13 @@
               <span>裂口追击</span>
             </div>
           </div>
+          <div class="info-block concept-block">
+            <p class="info-label">原画封面</p>
+            <div class="concept-card">
+              <img src="./assets/art/worldline-concept.png?v=20260420-art-integrated" alt="项目世界观原画" />
+              <p>这张原画现在已经接入首页和剧情弹窗，后面也可以继续拆成章节插画与角色立绘。</p>
+            </div>
+          </div>
           <div class="info-block">
             <p class="info-label">下一步建议</p>
             <ul class="info-list">
@@ -156,12 +185,12 @@
       </main>
     </div>
 
-    <script src="./src/games/comet-dash.js?v=20260420-ui-grand" defer></script>
-    <script src="./src/games/moo-mission.js?v=20260420-ui-grand" defer></script>
-    <script src="./src/games/evil-valley-inn.js?v=20260420-ui-grand" defer></script>
-    <script src="./src/games/owl-magician.js?v=20260420-ui-grand" defer></script>
-    <script src="./src/games/milk-dragon-brawl.js?v=20260420-ui-grand" defer></script>
-    <script src="./src/games/index.js?v=20260420-ui-grand" defer></script>
-    <script src="./src/main.js?v=20260420-ui-grand" defer></script>
+    <script src="./src/games/comet-dash.js?v=20260420-art-integrated" defer></script>
+    <script src="./src/games/moo-mission.js?v=20260420-art-integrated" defer></script>
+    <script src="./src/games/evil-valley-inn.js?v=20260420-art-integrated" defer></script>
+    <script src="./src/games/owl-magician.js?v=20260420-art-integrated" defer></script>
+    <script src="./src/games/milk-dragon-brawl.js?v=20260420-art-integrated" defer></script>
+    <script src="./src/games/index.js?v=20260420-art-integrated" defer></script>
+    <script src="./src/main.js?v=20260420-art-integrated" defer></script>
   </body>
 </html>
