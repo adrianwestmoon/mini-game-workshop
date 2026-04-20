@@ -1,0 +1,1077 @@
+const OWL_MAGE_BEST_KEY = "mini-game-workshop:owl-magician:best-score";
+
+window.owlMagician = {
+  id: "owl-magician",
+  title: "猫头鹰与魔术师金声",
+  description:
+    "月夜守灯动作游戏。魔术师金声带着猫头鹰穿过林间空地，收集星羽充能、点亮三座月灯、击退夜影并守住法阵。",
+  controls: [
+    "拖动屏幕 / 鼠标：移动金声",
+    "WASD / 方向键：备用移动",
+    "E / Space：释放月光脉冲，点灯、补灯、清夜影",
+    "收集星羽给法杖充能，守住三座月灯直到全部点亮",
+  ],
+  create(canvas, callbacks) {
+    const context = canvas.getContext("2d");
+    const audio = createOwlMageAudio();
+    const keys = new Set();
+    const pointer = { active: false, id: null, x: 0, y: 0 };
+    const state = {
+      width: 960,
+      height: 540,
+      lastFrame: 0,
+      elapsed: 0,
+      score: 0,
+      best: readOwlMageBest(),
+      lives: 4,
+      status: "MOON RISE",
+      gameOver: false,
+      won: false,
+      shake: 0,
+      flashTimer: 0,
+      spawnTimer: 0,
+      starTimer: 0,
+      particles: [],
+      wisps: [],
+      stars: [],
+      player: createMage(),
+      owl: createOwl(),
+      beacons: [],
+      spellButton: { x: 0, y: 0, radius: 56 },
+    };
+
+    function resizeCanvas() {
+      const rect = canvas.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      state.width = Math.max(320, rect.width);
+      state.height = Math.max(320, rect.height);
+      canvas.width = Math.floor(state.width * dpr);
+      canvas.height = Math.floor(state.height * dpr);
+      context.setTransform(dpr, 0, 0, dpr, 0, 0);
+      layoutArena();
+    }
+
+    function layoutArena() {
+      state.spellButton.x = state.width - 90;
+      state.spellButton.y = state.height - 86;
+      state.beacons = [
+        createBeacon(state.width * 0.24, state.height * 0.3, "晨露月灯"),
+        createBeacon(state.width * 0.52, state.height * 0.2, "云羽月灯"),
+        createBeacon(state.width * 0.78, state.height * 0.34, "琥珀月灯"),
+      ];
+
+      if (!state.gameOver) {
+        state.player.x = state.width * 0.5;
+        state.player.y = state.height * 0.72;
+        state.owl.x = state.player.x + 42;
+        state.owl.y = state.player.y - 36;
+      }
+    }
+
+    function emitState(status, hint) {
+      state.status = status;
+      callbacks.onStateChange({
+        title: `${window.owlMagician.title} · 月夜守灯`,
+        description: window.owlMagician.description,
+        controls: window.owlMagician.controls,
+        score: Math.floor(state.score),
+        lives: state.lives,
+        best: state.best,
+        status,
+        hint,
+      });
+    }
+
+    function litCount() {
+      return state.beacons.filter((beacon) => beacon.lit).length;
+    }
+
+    function resetRun() {
+      state.elapsed = 0;
+      state.score = 0;
+      state.lives = 4;
+      state.gameOver = false;
+      state.won = false;
+      state.shake = 0;
+      state.flashTimer = 0;
+      state.spawnTimer = 1.1;
+      state.starTimer = 0.35;
+      state.particles = [];
+      state.wisps = [];
+      state.stars = [];
+      state.player = createMage({
+        x: state.width * 0.5,
+        y: state.height * 0.72,
+      });
+      state.owl = createOwl();
+      state.owl.x = state.player.x + 42;
+      state.owl.y = state.player.y - 36;
+      layoutArena();
+      state.player.charge = 42;
+
+      for (let index = 0; index < 4; index += 1) {
+        state.stars.push(createStarFeather(random(state.width * 0.18, state.width * 0.82), random(state.height * 0.2, state.height * 0.76)));
+      }
+
+      emitState("MOON RISE", "先收集星羽，再靠近月灯释放脉冲点亮法阵。");
+    }
+
+    function saveBest() {
+      state.best = Math.max(state.best, Math.floor(state.score));
+      writeOwlMageBest(state.best);
+    }
+
+    function finishRun() {
+      if (state.gameOver) {
+        return;
+      }
+      state.gameOver = true;
+      state.won = true;
+      saveBest();
+      audio.win();
+      burstParticles(state.player.x, state.player.y, "rgba(255, 236, 154, 0.95)", 32, 260, 0.8);
+      emitState("OWL CLEAR", "三座月灯都稳定发光了，点一下画布再跑一轮。");
+    }
+
+    function failLife() {
+      if (state.player.invulnerable > 0 || state.gameOver) {
+        return;
+      }
+
+      state.lives -= 1;
+      state.player.invulnerable = 1.2;
+      state.flashTimer = 0.2;
+      state.shake = 12;
+      audio.hurt();
+      burstParticles(state.player.x, state.player.y - 12, "rgba(255, 161, 145, 0.95)", 18, 220, 0.45);
+
+      if (state.lives <= 0) {
+        state.gameOver = true;
+        saveBest();
+        audio.gameOver();
+        emitState("MOON FALL", "夜影压过来了，点一下画布重新守灯。");
+        return;
+      }
+
+      state.player.x = state.width * 0.5;
+      state.player.y = state.height * 0.72;
+      state.player.vx = 0;
+      state.player.vy = 0;
+      emitState("HOLD FAST", "别慌，先吃星羽补充能量，再回去点灯。");
+    }
+
+    function tryCastSpell() {
+      audio.unlock();
+
+      if (state.gameOver) {
+        resetRun();
+        return;
+      }
+
+      if (state.player.spellCooldown > 0 || state.player.charge < 24) {
+        return;
+      }
+
+      state.player.spellCooldown = 0.55;
+      state.player.charge = Math.max(0, state.player.charge - 24);
+      state.flashTimer = 0.14;
+      state.shake = Math.max(state.shake, 6);
+      audio.cast();
+
+      const pulseRadius = 126;
+      let litOrHealed = false;
+
+      for (const beacon of state.beacons) {
+        const distance = getDistance(state.player.x, state.player.y - 10, beacon.x, beacon.y - 16);
+        if (distance > pulseRadius) {
+          continue;
+        }
+
+        if (!beacon.lit) {
+          beacon.lit = true;
+          beacon.integrity = 100;
+          state.score += 90;
+          litOrHealed = true;
+          burstParticles(beacon.x, beacon.y - 18, "rgba(255, 243, 176, 0.96)", 18, 180, 0.56);
+        } else {
+          beacon.integrity = Math.min(100, beacon.integrity + 42);
+          litOrHealed = true;
+          burstParticles(beacon.x, beacon.y - 18, "rgba(120, 230, 255, 0.8)", 10, 120, 0.36);
+        }
+      }
+
+      for (let index = state.wisps.length - 1; index >= 0; index -= 1) {
+        const wisp = state.wisps[index];
+        const distance = getDistance(state.player.x, state.player.y - 8, wisp.x, wisp.y);
+        if (distance > pulseRadius + wisp.radius) {
+          continue;
+        }
+
+        wisp.hp -= 2;
+        wisp.stun = 0.28;
+        if (wisp.hp <= 0) {
+          defeatWisp(index, "rgba(190, 220, 255, 0.96)");
+        } else {
+          burstParticles(wisp.x, wisp.y, "rgba(146, 194, 255, 0.84)", 8, 140, 0.28);
+        }
+      }
+
+      state.particles.push({
+        kind: "ring",
+        x: state.player.x,
+        y: state.player.y - 10,
+        radius: 26,
+        growth: 280,
+        lineWidth: 4,
+        life: 0.38,
+        color: litOrHealed ? "rgba(255, 241, 154, 0.95)" : "rgba(120, 228, 255, 0.92)",
+      });
+
+      if (litCount() === state.beacons.length && state.beacons.every((beacon) => beacon.integrity > 34)) {
+        finishRun();
+      }
+    }
+
+    function createFloatingSpark(x, y) {
+      state.particles.push({
+        kind: "spark",
+        x,
+        y,
+        vx: random(-18, 18),
+        vy: random(-42, -12),
+        size: random(2, 4),
+        life: random(0.4, 0.72),
+        color: "rgba(255, 241, 166, 0.92)",
+      });
+    }
+
+    function burstParticles(x, y, color, count, speed, life) {
+      for (let index = 0; index < count; index += 1) {
+        state.particles.push({
+          kind: index % 4 === 0 ? "ring-dot" : "spark",
+          x,
+          y,
+          vx: random(-speed, speed),
+          vy: random(-speed, speed),
+          size: random(2, 5),
+          lineWidth: random(1, 2.4),
+          life: random(life * 0.45, life),
+          color,
+        });
+      }
+    }
+
+    function defeatWisp(index, color) {
+      const wisp = state.wisps[index];
+      state.score += 26;
+      audio.hit();
+      burstParticles(wisp.x, wisp.y, color, 12, 150, 0.36);
+      if (Math.random() < 0.52) {
+        state.stars.push(createStarFeather(wisp.x + random(-8, 8), wisp.y + random(-8, 8)));
+      }
+      state.wisps.splice(index, 1);
+    }
+
+    function currentInput() {
+      const left = keys.has("arrowleft") || keys.has("a");
+      const right = keys.has("arrowright") || keys.has("d");
+      const up = keys.has("arrowup") || keys.has("w");
+      const down = keys.has("arrowdown") || keys.has("s");
+      return { left, right, up, down };
+    }
+
+    function updatePlayer(delta) {
+      const input = currentInput();
+      let moveX = 0;
+      let moveY = 0;
+
+      if (input.left) {
+        moveX -= 1;
+      }
+      if (input.right) {
+        moveX += 1;
+      }
+      if (input.up) {
+        moveY -= 1;
+      }
+      if (input.down) {
+        moveY += 1;
+      }
+
+      if (pointer.active) {
+        const dx = pointer.x - state.player.x;
+        const dy = pointer.y - state.player.y;
+        const distance = Math.hypot(dx, dy);
+        if (distance > 10) {
+          moveX = dx / distance;
+          moveY = dy / distance;
+        }
+      }
+
+      const speed = 250;
+      const length = Math.hypot(moveX, moveY) || 1;
+      state.player.vx += ((moveX / length) * speed - state.player.vx) * Math.min(1, delta * 8.6);
+      state.player.vy += ((moveY / length) * speed - state.player.vy) * Math.min(1, delta * 8.6);
+
+      state.player.x = clamp(state.player.x + state.player.vx * delta, 44, state.width - 44);
+      state.player.y = clamp(state.player.y + state.player.vy * delta, 52, state.height - 44);
+      state.player.spellCooldown = Math.max(0, state.player.spellCooldown - delta);
+      state.player.invulnerable = Math.max(0, state.player.invulnerable - delta);
+      state.player.charge = Math.min(100, state.player.charge + delta * 4.8);
+      state.player.bob += delta * 4.4;
+    }
+
+    function updateOwl(delta) {
+      state.owl.angle += delta * 2.8;
+      const orbitRadius = 44 + Math.sin(state.elapsed * 2.4) * 8;
+      const targetX = state.player.x + Math.cos(state.owl.angle) * orbitRadius;
+      const targetY = state.player.y - 36 + Math.sin(state.owl.angle * 1.25) * 14;
+      state.owl.x += (targetX - state.owl.x) * Math.min(1, delta * 8.4);
+      state.owl.y += (targetY - state.owl.y) * Math.min(1, delta * 8.4);
+      state.owl.cooldown = Math.max(0, state.owl.cooldown - delta);
+
+      const target = state.wisps.find((wisp) => getDistance(state.owl.x, state.owl.y, wisp.x, wisp.y) < 150);
+      if (target && state.owl.cooldown <= 0) {
+        state.owl.cooldown = 0.78;
+        target.hp -= 1;
+        target.stun = 0.22;
+        createFloatingSpark(target.x, target.y);
+        createFloatingSpark(target.x, target.y - 4);
+        audio.owl();
+        if (target.hp <= 0) {
+          const index = state.wisps.indexOf(target);
+          if (index >= 0) {
+            defeatWisp(index, "rgba(255, 218, 166, 0.92)");
+          }
+        }
+      }
+    }
+
+    function updateStars(delta) {
+      state.starTimer -= delta;
+      if (state.starTimer <= 0) {
+        state.starTimer = random(1.1, 1.9);
+        state.stars.push(createStarFeather(random(80, state.width - 80), random(90, state.height - 120)));
+      }
+
+      for (let index = state.stars.length - 1; index >= 0; index -= 1) {
+        const star = state.stars[index];
+        star.life -= delta;
+        star.phase += delta * star.wobble;
+        star.y += Math.sin(star.phase) * 12 * delta;
+
+        const playerDistance = getDistance(state.player.x, state.player.y, star.x, star.y);
+        const owlDistance = getDistance(state.owl.x, state.owl.y, star.x, star.y);
+        if (playerDistance < 24 || owlDistance < 24) {
+          state.player.charge = Math.min(100, state.player.charge + 20);
+          state.score += 12;
+          audio.pickup();
+          burstParticles(star.x, star.y, "rgba(255, 246, 171, 0.95)", 8, 90, 0.28);
+          state.stars.splice(index, 1);
+          continue;
+        }
+
+        if (star.life <= 0) {
+          state.stars.splice(index, 1);
+        }
+      }
+    }
+
+    function updateBeacons(delta) {
+      for (const beacon of state.beacons) {
+        if (beacon.lit) {
+          beacon.integrity = Math.max(0, beacon.integrity - delta * 1.25);
+          if (beacon.integrity <= 0) {
+            beacon.lit = false;
+            beacon.integrity = 0;
+            burstParticles(beacon.x, beacon.y - 18, "rgba(115, 130, 180, 0.72)", 14, 130, 0.4);
+          }
+        }
+      }
+    }
+
+    function pickWispTarget() {
+      const vulnerable = state.beacons.filter((beacon) => beacon.lit);
+      if (vulnerable.length > 0 && Math.random() < 0.58) {
+        return vulnerable[Math.floor(Math.random() * vulnerable.length)];
+      }
+      return state.player;
+    }
+
+    function spawnWisp() {
+      const side = Math.floor(Math.random() * 4);
+      let x = 0;
+      let y = 0;
+
+      if (side === 0) {
+        x = random(-20, state.width + 20);
+        y = -30;
+      } else if (side === 1) {
+        x = state.width + 30;
+        y = random(-20, state.height + 20);
+      } else if (side === 2) {
+        x = random(-20, state.width + 20);
+        y = state.height + 30;
+      } else {
+        x = -30;
+        y = random(-20, state.height + 20);
+      }
+
+      state.wisps.push({
+        x,
+        y,
+        radius: random(14, 18),
+        speed: random(52, 86) + litCount() * 6 + Math.min(36, state.elapsed * 1.2),
+        hp: Math.random() < 0.3 ? 3 : 2,
+        wobble: random(2.2, 4.8),
+        phase: random(0, Math.PI * 2),
+        stun: 0,
+        target: pickWispTarget(),
+      });
+    }
+
+    function updateWisps(delta) {
+      state.spawnTimer -= delta;
+      if (state.spawnTimer <= 0) {
+        state.spawnTimer = Math.max(0.42, 1.2 - state.elapsed * 0.015);
+        spawnWisp();
+      }
+
+      for (let index = state.wisps.length - 1; index >= 0; index -= 1) {
+        const wisp = state.wisps[index];
+        if (!wisp.target || (wisp.target !== state.player && !wisp.target.lit)) {
+          wisp.target = pickWispTarget();
+        }
+
+        wisp.stun = Math.max(0, wisp.stun - delta);
+        wisp.phase += delta * wisp.wobble;
+        const speedScale = wisp.stun > 0 ? 0.24 : 1;
+        const targetX = wisp.target.x;
+        const targetY = wisp.target === state.player ? wisp.target.y - 10 : wisp.target.y - 18;
+        const dx = targetX - wisp.x;
+        const dy = targetY - wisp.y;
+        const distance = Math.hypot(dx, dy) || 1;
+
+        wisp.x += (dx / distance) * wisp.speed * speedScale * delta;
+        wisp.y += (dy / distance) * wisp.speed * speedScale * delta + Math.sin(wisp.phase) * 12 * delta;
+
+        if (getDistance(wisp.x, wisp.y, state.player.x, state.player.y - 6) < wisp.radius + 16) {
+          failLife();
+          wisp.x -= dx / distance * 28;
+          wisp.y -= dy / distance * 28;
+        }
+
+        for (const beacon of state.beacons) {
+          if (!beacon.lit) {
+            continue;
+          }
+
+          const beaconDistance = getDistance(wisp.x, wisp.y, beacon.x, beacon.y - 18);
+          if (beaconDistance < wisp.radius + 22) {
+            beacon.integrity = Math.max(0, beacon.integrity - delta * 26);
+            burstParticles(beacon.x, beacon.y - 18, "rgba(109, 144, 190, 0.24)", 1, 50, 0.12);
+            if (beacon.integrity <= 0) {
+              beacon.lit = false;
+              burstParticles(beacon.x, beacon.y - 18, "rgba(92, 108, 138, 0.75)", 14, 140, 0.42);
+            }
+          }
+        }
+      }
+    }
+
+    function updateParticles(delta) {
+      for (let index = state.particles.length - 1; index >= 0; index -= 1) {
+        const particle = state.particles[index];
+        particle.life -= delta;
+        particle.x += (particle.vx || 0) * delta;
+        particle.y += (particle.vy || 0) * delta;
+        if (particle.radius != null) {
+          particle.radius += (particle.growth || 0) * delta;
+        }
+        if (particle.life <= 0) {
+          state.particles.splice(index, 1);
+        }
+      }
+    }
+
+    function update(delta) {
+      state.elapsed += delta;
+      state.shake = Math.max(0, state.shake - delta * 24);
+      state.flashTimer = Math.max(0, state.flashTimer - delta);
+
+      if (state.gameOver) {
+        emitState(
+          state.won ? "OWL CLEAR" : "MOON FALL",
+          state.won ? "猫头鹰守住了夜色，点一下画布再来一轮。" : "点一下画布，重新守住三座月灯。",
+        );
+        return;
+      }
+
+      updatePlayer(delta);
+      updateOwl(delta);
+      updateStars(delta);
+      updateBeacons(delta);
+      updateWisps(delta);
+      updateParticles(delta);
+
+      const lit = litCount();
+      const lowestIntegrity = Math.floor(Math.min(...state.beacons.map((beacon) => (beacon.lit ? beacon.integrity : 0))));
+      emitState(
+        `LIGHT ${lit}/${state.beacons.length}`,
+        lit === state.beacons.length
+          ? `三座月灯都点亮了，稳住灯火。当前最低灯值 ${Math.max(0, lowestIntegrity)}。`
+          : `还差 ${state.beacons.length - lit} 座月灯。法杖充能 ${Math.floor(state.player.charge)}。`,
+      );
+
+      if (lit === state.beacons.length && state.beacons.every((beacon) => beacon.integrity > 72)) {
+        finishRun();
+      }
+    }
+
+    function drawBackground() {
+      const gradient = context.createLinearGradient(0, 0, 0, state.height);
+      gradient.addColorStop(0, "#071228");
+      gradient.addColorStop(0.55, "#162540");
+      gradient.addColorStop(1, "#2e2336");
+      context.fillStyle = gradient;
+      context.fillRect(0, 0, state.width, state.height);
+
+      const moonX = state.width * 0.82;
+      const moonY = state.height * 0.16;
+      context.fillStyle = "rgba(255, 246, 210, 0.95)";
+      context.beginPath();
+      context.arc(moonX, moonY, 38, 0, Math.PI * 2);
+      context.fill();
+
+      context.fillStyle = "rgba(13, 20, 34, 0.18)";
+      context.beginPath();
+      context.arc(moonX + 12, moonY - 4, 36, 0, Math.PI * 2);
+      context.fill();
+
+      for (let index = 0; index < 38; index += 1) {
+        const x = ((index * 127) % state.width) + (index % 3) * 12;
+        const y = 20 + ((index * 67) % Math.floor(state.height * 0.52));
+        const alpha = 0.25 + ((index * 13) % 50) / 100;
+        context.fillStyle = `rgba(255, 248, 228, ${alpha})`;
+        context.fillRect(x, y, index % 4 === 0 ? 3 : 2, index % 4 === 0 ? 3 : 2);
+      }
+
+      const floor = context.createLinearGradient(0, state.height * 0.46, 0, state.height);
+      floor.addColorStop(0, "rgba(44, 66, 62, 0.14)");
+      floor.addColorStop(1, "rgba(20, 32, 26, 0.92)");
+      context.fillStyle = floor;
+      context.fillRect(0, state.height * 0.46, state.width, state.height * 0.54);
+
+      for (let index = 0; index < 10; index += 1) {
+        const baseX = index * (state.width / 9) + (index % 2) * 26;
+        context.fillStyle = "rgba(13, 24, 18, 0.85)";
+        context.beginPath();
+        context.moveTo(baseX - 38, state.height);
+        context.lineTo(baseX - 6, state.height * 0.58);
+        context.lineTo(baseX + 22, state.height);
+        context.fill();
+      }
+    }
+
+    function drawBeacons() {
+      for (const beacon of state.beacons) {
+        context.save();
+        context.translate(beacon.x, beacon.y);
+
+        context.fillStyle = "#5e4238";
+        context.fillRect(-6, -8, 12, 54);
+        context.fillStyle = "#87604f";
+        context.fillRect(-10, -16, 20, 12);
+
+        if (beacon.lit) {
+          const glow = context.createRadialGradient(0, -20, 4, 0, -20, 54);
+          glow.addColorStop(0, "rgba(255, 241, 183, 0.98)");
+          glow.addColorStop(0.35, "rgba(255, 220, 126, 0.64)");
+          glow.addColorStop(1, "rgba(255, 201, 96, 0)");
+          context.fillStyle = glow;
+          context.beginPath();
+          context.arc(0, -20, 54, 0, Math.PI * 2);
+          context.fill();
+        }
+
+        context.fillStyle = beacon.lit ? "#ffe9aa" : "#9aa0b8";
+        context.beginPath();
+        context.arc(0, -20, 12, 0, Math.PI * 2);
+        context.fill();
+
+        context.strokeStyle = beacon.lit ? "rgba(120, 228, 255, 0.85)" : "rgba(120, 140, 180, 0.5)";
+        context.lineWidth = 4;
+        context.beginPath();
+        context.arc(0, -20, 18, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * (beacon.integrity / 100));
+        context.stroke();
+
+        context.fillStyle = "rgba(255, 255, 255, 0.86)";
+        context.font = '600 12px "Avenir Next", "Trebuchet MS", sans-serif';
+        context.textAlign = "center";
+        context.fillText(beacon.name, 0, 64);
+        context.restore();
+      }
+    }
+
+    function drawStars() {
+      for (const star of state.stars) {
+        context.save();
+        context.translate(star.x, star.y);
+        context.rotate(Math.sin(star.phase) * 0.24);
+        context.fillStyle = "rgba(255, 244, 170, 0.95)";
+        context.beginPath();
+        context.moveTo(0, -10);
+        context.lineTo(4, -2);
+        context.lineTo(11, 0);
+        context.lineTo(4, 4);
+        context.lineTo(0, 12);
+        context.lineTo(-4, 4);
+        context.lineTo(-11, 0);
+        context.lineTo(-4, -2);
+        context.closePath();
+        context.fill();
+        context.restore();
+      }
+    }
+
+    function drawWisps() {
+      for (const wisp of state.wisps) {
+        context.save();
+        context.translate(wisp.x, wisp.y);
+        context.fillStyle = "rgba(44, 37, 82, 0.86)";
+        context.beginPath();
+        context.arc(0, 0, wisp.radius, 0, Math.PI * 2);
+        context.fill();
+
+        context.fillStyle = "rgba(210, 232, 255, 0.92)";
+        context.beginPath();
+        context.arc(-4, -3, 2.8, 0, Math.PI * 2);
+        context.arc(4, -3, 2.8, 0, Math.PI * 2);
+        context.fill();
+
+        context.strokeStyle = "rgba(125, 168, 255, 0.85)";
+        context.lineWidth = 2;
+        context.beginPath();
+        context.arc(0, 0, wisp.radius + 5, 0, Math.PI * 1.4);
+        context.stroke();
+        context.restore();
+      }
+    }
+
+    function drawMage() {
+      context.save();
+      context.translate(state.player.x, state.player.y + Math.sin(state.player.bob) * 2);
+
+      if (state.player.invulnerable > 0 && Math.floor(state.player.invulnerable * 14) % 2 === 0) {
+        context.globalAlpha = 0.5;
+      }
+
+      context.fillStyle = "#fedfc1";
+      context.beginPath();
+      context.arc(0, -26, 13, 0, Math.PI * 2);
+      context.fill();
+
+      context.fillStyle = "#1d2854";
+      context.beginPath();
+      context.moveTo(-18, -28);
+      context.lineTo(0, -54);
+      context.lineTo(16, -24);
+      context.closePath();
+      context.fill();
+      context.fillRect(-12, -26, 24, 6);
+
+      context.fillStyle = "#2a4b7c";
+      context.fillRect(-14, -12, 28, 34);
+      context.fillStyle = "#7ce7ff";
+      context.fillRect(-8, -4, 16, 7);
+
+      context.fillStyle = "#f6a27f";
+      context.fillRect(-9, 22, 7, 18);
+      context.fillRect(2, 22, 7, 18);
+
+      context.strokeStyle = "rgba(255, 237, 150, 0.92)";
+      context.lineWidth = 4;
+      context.beginPath();
+      context.moveTo(16, -10);
+      context.lineTo(26, 12);
+      context.stroke();
+
+      context.fillStyle = "rgba(255, 246, 173, 0.95)";
+      context.beginPath();
+      context.arc(28, 14, 6, 0, Math.PI * 2);
+      context.fill();
+      context.restore();
+    }
+
+    function drawOwl() {
+      context.save();
+      context.translate(state.owl.x, state.owl.y);
+      context.rotate(Math.sin(state.elapsed * 4.8) * 0.12);
+
+      context.fillStyle = "#c7904c";
+      context.beginPath();
+      context.ellipse(0, 0, 16, 19, 0, 0, Math.PI * 2);
+      context.fill();
+
+      context.fillStyle = "#f9e8ca";
+      context.beginPath();
+      context.ellipse(0, 4, 11, 11, 0, 0, Math.PI * 2);
+      context.fill();
+
+      context.fillStyle = "#fff";
+      context.beginPath();
+      context.arc(-5, -4, 4.8, 0, Math.PI * 2);
+      context.arc(5, -4, 4.8, 0, Math.PI * 2);
+      context.fill();
+
+      context.fillStyle = "#121212";
+      context.beginPath();
+      context.arc(-5, -4, 2, 0, Math.PI * 2);
+      context.arc(5, -4, 2, 0, Math.PI * 2);
+      context.fill();
+
+      context.fillStyle = "#f4b15c";
+      context.beginPath();
+      context.moveTo(0, 0);
+      context.lineTo(5, 6);
+      context.lineTo(-5, 6);
+      context.closePath();
+      context.fill();
+
+      context.strokeStyle = "#9f6c3f";
+      context.lineWidth = 5;
+      context.lineCap = "round";
+      context.beginPath();
+      context.moveTo(-12, 4);
+      context.lineTo(-22, -2 - Math.sin(state.elapsed * 6) * 4);
+      context.moveTo(12, 4);
+      context.lineTo(22, -2 + Math.sin(state.elapsed * 6) * 4);
+      context.stroke();
+      context.restore();
+    }
+
+    function drawParticles() {
+      for (const particle of state.particles) {
+        context.save();
+        context.globalAlpha = Math.max(0, Math.min(1, particle.life * 2));
+        context.strokeStyle = particle.color;
+        context.fillStyle = particle.color;
+
+        if (particle.kind === "ring") {
+          context.lineWidth = particle.lineWidth || 2;
+          context.beginPath();
+          context.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2);
+          context.stroke();
+        } else {
+          context.beginPath();
+          context.arc(particle.x, particle.y, particle.size || 3, 0, Math.PI * 2);
+          context.fill();
+        }
+        context.restore();
+      }
+    }
+
+    function drawSpellButton() {
+      context.save();
+      context.translate(state.spellButton.x, state.spellButton.y);
+
+      const ready = state.player.charge >= 24 && state.player.spellCooldown <= 0;
+      context.fillStyle = ready ? "rgba(94, 122, 225, 0.38)" : "rgba(52, 66, 110, 0.3)";
+      context.beginPath();
+      context.arc(0, 0, state.spellButton.radius, 0, Math.PI * 2);
+      context.fill();
+
+      context.strokeStyle = ready ? "rgba(151, 218, 255, 0.92)" : "rgba(122, 144, 198, 0.64)";
+      context.lineWidth = 4;
+      context.beginPath();
+      context.arc(0, 0, state.spellButton.radius - 6, 0, Math.PI * 2);
+      context.stroke();
+
+      context.fillStyle = "#f6fbff";
+      context.font = '700 17px "Avenir Next", "Trebuchet MS", sans-serif';
+      context.textAlign = "center";
+      context.fillText("SPELL", 0, -2);
+      context.font = '600 12px "Avenir Next", "Trebuchet MS", sans-serif';
+      context.fillText(`${Math.floor(state.player.charge)}/24`, 0, 18);
+      context.restore();
+    }
+
+    function drawOverlay() {
+      context.fillStyle = "rgba(255, 255, 255, 0.86)";
+      context.font = '700 18px "Avenir Next", "Trebuchet MS", sans-serif';
+      context.textAlign = "left";
+      context.fillText(`Charge ${Math.floor(state.player.charge)}`, 26, 34);
+      context.fillText(`Night Wisp ${state.wisps.length}`, 26, 60);
+
+      if (state.flashTimer > 0) {
+        context.fillStyle = `rgba(255, 245, 186, ${state.flashTimer * 0.45})`;
+        context.fillRect(0, 0, state.width, state.height);
+      }
+
+      if (state.gameOver) {
+        context.fillStyle = "rgba(9, 12, 24, 0.66)";
+        context.fillRect(0, 0, state.width, state.height);
+
+        context.fillStyle = "#fff4d9";
+        context.textAlign = "center";
+        context.font = '700 42px "Avenir Next", "Trebuchet MS", sans-serif';
+        context.fillText(state.won ? "OWL CLEAR" : "MOON FALL", state.width / 2, state.height / 2 - 18);
+        context.font = '500 20px "Avenir Next", "Trebuchet MS", sans-serif';
+        context.fillText(
+          state.won ? "金声和猫头鹰把三座月灯都稳住了。" : "夜影扑了过来，再施一次月光脉冲。",
+          state.width / 2,
+          state.height / 2 + 18,
+        );
+        context.fillText("Tap the stage or press Space / E to restart", state.width / 2, state.height / 2 + 50);
+        context.textAlign = "left";
+      }
+    }
+
+    function render() {
+      context.save();
+      context.clearRect(0, 0, state.width, state.height);
+
+      if (state.shake > 0) {
+        context.translate(random(-state.shake, state.shake), random(-state.shake, state.shake));
+      }
+
+      drawBackground();
+      drawBeacons();
+      drawStars();
+      drawWisps();
+      drawMage();
+      drawOwl();
+      drawParticles();
+      drawSpellButton();
+      drawOverlay();
+      context.restore();
+    }
+
+    function frame(now) {
+      if (!state.lastFrame) {
+        state.lastFrame = now;
+      }
+
+      const delta = Math.min(0.033, (now - state.lastFrame) / 1000);
+      state.lastFrame = now;
+      update(delta);
+      render();
+      state.rafId = window.requestAnimationFrame(frame);
+    }
+
+    function setPointerPosition(event) {
+      const rect = canvas.getBoundingClientRect();
+      pointer.x = event.clientX - rect.left;
+      pointer.y = event.clientY - rect.top;
+    }
+
+    function onPointerDown(event) {
+      setPointerPosition(event);
+      audio.unlock();
+
+      if (state.gameOver) {
+        tryCastSpell();
+        return;
+      }
+
+      if (getDistance(pointer.x, pointer.y, state.spellButton.x, state.spellButton.y) <= state.spellButton.radius) {
+        tryCastSpell();
+        return;
+      }
+
+      pointer.active = true;
+      pointer.id = event.pointerId;
+    }
+
+    function onPointerMove(event) {
+      if (!pointer.active || event.pointerId !== pointer.id) {
+        return;
+      }
+      setPointerPosition(event);
+    }
+
+    function onPointerUp(event) {
+      if (event.pointerId === pointer.id) {
+        pointer.active = false;
+        pointer.id = null;
+      }
+    }
+
+    function onKeyDown(event) {
+      const key = event.key.toLowerCase();
+      keys.add(key);
+      audio.unlock();
+
+      if (!event.repeat && (key === " " || key === "e" || key === "enter")) {
+        event.preventDefault();
+        tryCastSpell();
+      }
+    }
+
+    function onKeyUp(event) {
+      keys.delete(event.key.toLowerCase());
+    }
+
+    resizeCanvas();
+    resetRun();
+    window.addEventListener("resize", resizeCanvas);
+    window.addEventListener("keydown", onKeyDown);
+    window.addEventListener("keyup", onKeyUp);
+    canvas.addEventListener("pointerdown", onPointerDown);
+    canvas.addEventListener("pointermove", onPointerMove);
+    canvas.addEventListener("pointerup", onPointerUp);
+    canvas.addEventListener("pointercancel", onPointerUp);
+    state.rafId = window.requestAnimationFrame(frame);
+
+    return {
+      destroy() {
+        window.cancelAnimationFrame(state.rafId);
+        window.removeEventListener("resize", resizeCanvas);
+        window.removeEventListener("keydown", onKeyDown);
+        window.removeEventListener("keyup", onKeyUp);
+        canvas.removeEventListener("pointerdown", onPointerDown);
+        canvas.removeEventListener("pointermove", onPointerMove);
+        canvas.removeEventListener("pointerup", onPointerUp);
+        canvas.removeEventListener("pointercancel", onPointerUp);
+      },
+    };
+  },
+};
+
+function createMage(overrides = {}) {
+  return {
+    x: 480,
+    y: 380,
+    vx: 0,
+    vy: 0,
+    charge: 38,
+    invulnerable: 0,
+    spellCooldown: 0,
+    bob: 0,
+    ...overrides,
+  };
+}
+
+function createOwl() {
+  return {
+    x: 520,
+    y: 340,
+    angle: 0,
+    cooldown: 0,
+  };
+}
+
+function createBeacon(x, y, name) {
+  return {
+    x,
+    y,
+    name,
+    lit: false,
+    integrity: 0,
+  };
+}
+
+function createStarFeather(x, y) {
+  return {
+    x,
+    y,
+    life: random(6, 10),
+    phase: random(0, Math.PI * 2),
+    wobble: random(1.8, 4.2),
+  };
+}
+
+function readOwlMageBest() {
+  try {
+    return Number(window.localStorage.getItem(OWL_MAGE_BEST_KEY) || 0);
+  } catch (error) {
+    return 0;
+  }
+}
+
+function writeOwlMageBest(best) {
+  try {
+    window.localStorage.setItem(OWL_MAGE_BEST_KEY, String(best));
+  } catch (error) {
+    return;
+  }
+}
+
+function clamp(value, min, max) {
+  return Math.min(max, Math.max(min, value));
+}
+
+function random(min, max) {
+  return min + Math.random() * (max - min);
+}
+
+function getDistance(ax, ay, bx, by) {
+  return Math.hypot(ax - bx, ay - by);
+}
+
+function createOwlMageAudio() {
+  let audioContext = null;
+
+  function ensureContext() {
+    if (!audioContext) {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextClass) {
+        return null;
+      }
+      audioContext = new AudioContextClass();
+    }
+    if (audioContext.state === "suspended") {
+      audioContext.resume().catch(() => {});
+    }
+    return audioContext;
+  }
+
+  function tone(type, frequency, duration, volume, glide = frequency) {
+    const context = ensureContext();
+    if (!context) {
+      return;
+    }
+
+    const now = context.currentTime;
+    const oscillator = context.createOscillator();
+    const gain = context.createGain();
+    oscillator.type = type;
+    oscillator.frequency.setValueAtTime(frequency, now);
+    oscillator.frequency.exponentialRampToValueAtTime(glide, now + duration);
+    gain.gain.setValueAtTime(volume, now);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+    oscillator.connect(gain);
+    gain.connect(context.destination);
+    oscillator.start(now);
+    oscillator.stop(now + duration);
+  }
+
+  return {
+    unlock() {
+      ensureContext();
+    },
+    cast() {
+      tone("triangle", 280, 0.18, 0.08, 720);
+      tone("sine", 640, 0.24, 0.05, 320);
+    },
+    pickup() {
+      tone("sine", 540, 0.08, 0.05, 840);
+    },
+    hit() {
+      tone("square", 210, 0.1, 0.04, 120);
+    },
+    hurt() {
+      tone("sawtooth", 200, 0.16, 0.07, 96);
+    },
+    owl() {
+      tone("triangle", 720, 0.09, 0.03, 920);
+    },
+    win() {
+      tone("triangle", 420, 0.18, 0.05, 640);
+      tone("sine", 640, 0.3, 0.06, 920);
+    },
+    gameOver() {
+      tone("sawtooth", 180, 0.28, 0.07, 70);
+    },
+  };
+}

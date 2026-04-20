@@ -1,4 +1,4 @@
-const APP_BUILD = "2026.04.20-moo-akai";
+const APP_BUILD = "2026.04.20-owl-mage";
 
 const elements = {
   best: document.querySelector("#best-value"),
