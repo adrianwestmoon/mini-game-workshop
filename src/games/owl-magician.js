@@ -242,7 +242,6 @@ window.owlMagician = {
       }
 
       state.lives -= 1;
-      state.player.invulnerable = 1.2;
       state.flashTimer = 0.2;
       state.shake = 12;
       audio.hurt();
@@ -257,10 +256,13 @@ window.owlMagician = {
         return;
       }
 
-      state.player.x = state.width * 0.5;
-      state.player.y = state.height * 0.72;
-      state.player.vx = 0;
-      state.player.vy = 0;
+      state.player = createMage({
+        x: state.width * 0.5,
+        y: state.height * 0.72,
+        charge: Math.max(state.player.charge, state.phaseIndex === 0 ? 38 : state.phaseIndex === 1 ? 46 : 54),
+        invulnerable: 1.2,
+      });
+      state.owl = createOwl();
       state.player.charge = Math.max(state.player.charge, state.phaseIndex === 0 ? 38 : state.phaseIndex === 1 ? 46 : 54);
       state.owl.x = state.player.x + 42;
       state.owl.y = state.player.y - 36;
@@ -269,6 +271,17 @@ window.owlMagician = {
       state.particles = [];
       state.spawnTimer = state.phaseIndex === 0 ? 1.1 : state.phaseIndex === 1 ? 0.96 : 0.84;
       state.eliteTimer = state.phaseIndex === 2 ? 3.2 : 4.8;
+      state.lastFrame = 0;
+
+      if (state.phaseIndex >= 1) {
+        for (const rift of state.rifts) {
+          if (rift.sealed) {
+            continue;
+          }
+          rift.spawnTimer = random(1.25, 2.05);
+          rift.phase = random(0, Math.PI * 2);
+        }
+      }
 
       emitState(
         "HOLD FAST",

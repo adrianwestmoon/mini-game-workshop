@@ -1,4 +1,4 @@
-const APP_BUILD = "2026.04.20-owl-input-fix";
+const APP_BUILD = "2026.04.20-owl-phase2-fix";
 const CAMPAIGN_PROGRESS_KEY = "mini-game-workshop:campaign-progress";
 
 const CAMPAIGN_CHAPTERS = [
