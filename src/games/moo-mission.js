@@ -4,7 +4,7 @@ window.mooMission = {
   id: "moo-mission",
   title: "Moo Mission",
   description:
-    "以小牛露娜为主角的横版闯关游戏。穿过草甸、风车坡和夜色谷仓，收集四叶草、避开荆棘与巡逻敌人，打开终点门。",
+    "以阿凯小牛为主角的横版闯关游戏。穿过草甸、风车坡和夜色谷仓，收集四叶草、避开荆棘与巡逻敌人，打开终点门。",
   controls: [
     "A / D 或方向键：左右移动",
     "W / Space / 上方向键：跳跃",
@@ -107,7 +107,7 @@ window.mooMission = {
       if (state.levelIndex === LEVELS.length - 1) {
         state.won = true;
         state.gameOver = true;
-        emitState("ALL CLEAR", "露娜安全到家了，点击画布再跑一轮。");
+        emitState("ALL CLEAR", "阿凯小牛安全到家了，点击画布再跑一轮。");
         return;
       }
 
@@ -132,7 +132,7 @@ window.mooMission = {
         state.best = Math.max(state.best, Math.floor(state.score));
         writeMooBest(state.best);
         audio.gameOver();
-        emitState("MISSION FAILED", "点一下画布，重新护送露娜闯关。");
+        emitState("MISSION FAILED", "点一下画布，重新护送阿凯小牛闯关。");
         return;
       }
 
@@ -413,7 +413,7 @@ window.mooMission = {
       updateCamera(delta);
 
       if (state.gameOver) {
-        emitState(state.won ? "ALL CLEAR" : "MISSION FAILED", state.won ? "露娜已经回家了，点一下再跑一轮。" : "点一下画布重新开始本次冒险。");
+        emitState(state.won ? "ALL CLEAR" : "MISSION FAILED", state.won ? "阿凯小牛已经回家了，点一下再跑一轮。" : "点一下画布重新开始本次冒险。");
         return;
       }
 
@@ -426,7 +426,7 @@ window.mooMission = {
       emitState(
         `LEVEL ${state.levelIndex + 1}/${LEVELS.length}`,
         state.level.gate.open
-          ? "终点门已经打开，带露娜进门。"
+          ? "终点门已经打开，带阿凯小牛进门。"
           : `还差 ${state.level.collectibles.filter((item) => !item.collected).length} 个四叶草。`,
       );
     }
@@ -711,7 +711,7 @@ window.mooMission = {
         context.font = '700 46px "Avenir Next", "Trebuchet MS", sans-serif';
         context.fillText(state.won ? "MOO COMPLETE" : "TRY AGAIN", state.width / 2, state.height / 2 - 26);
         context.font = '500 19px "Avenir Next", "Trebuchet MS", sans-serif';
-        context.fillText(state.won ? "露娜成功穿过全部牧场。" : "露娜摔回起点了，再闯一次。", state.width / 2, state.height / 2 + 10);
+        context.fillText(state.won ? "阿凯小牛成功穿过全部牧场。" : "阿凯小牛摔回起点了，再闯一次。", state.width / 2, state.height / 2 + 10);
         context.fillText("Tap the stage or press Space / Enter to restart", state.width / 2, state.height / 2 + 44);
         context.textAlign = "left";
       }
