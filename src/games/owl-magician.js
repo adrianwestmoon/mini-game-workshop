@@ -101,6 +101,10 @@ window.owlMagician = {
       return state.rifts.filter((rift) => !rift.sealed).length;
     }
 
+    function sealedRiftCount() {
+      return state.rifts.length - remainingRifts();
+    }
+
     function populateStars(count) {
       for (let index = 0; index < count; index += 1) {
         state.stars.push(createStarFeather(random(state.width * 0.18, state.width * 0.82), random(state.height * 0.2, state.height * 0.76)));
@@ -240,14 +244,25 @@ window.owlMagician = {
         return;
       }
 
-      setupPhase(state.phaseIndex, false);
+      state.player.x = state.width * 0.5;
+      state.player.y = state.height * 0.72;
+      state.player.vx = 0;
+      state.player.vy = 0;
+      state.player.charge = Math.max(state.player.charge, state.phaseIndex === 0 ? 38 : state.phaseIndex === 1 ? 46 : 54);
+      state.owl.x = state.player.x + 42;
+      state.owl.y = state.player.y - 36;
+      state.wisps = [];
+      state.particles = [];
+      state.spawnTimer = state.phaseIndex === 0 ? 1.1 : state.phaseIndex === 1 ? 0.96 : 0.84;
+      state.eliteTimer = state.phaseIndex === 2 ? 3.2 : 4.8;
+
       emitState(
         "HOLD FAST",
         state.phaseIndex === 2
-          ? "月核这一段要更稳，先守住灯火再补核。"
+          ? "这次不重置月核进度了，先清掉场上夜影，再回去补核。"
           : state.phaseIndex === 1
-            ? "先把裂隙封上，不然夜影会一直长出来。"
-            : "别慌，先吃星羽补充能量，再回去点灯。",
+            ? "裂隙进度会保留，贴近裂隙再放脉冲就能继续封。"
+            : "点灯进度会保留，先补充能量再把剩下月灯点亮。",
       );
     }
 
@@ -766,10 +781,10 @@ window.owlMagician = {
         );
       } else if (state.phaseIndex === 1) {
         emitState(
-          `SEAL ${remainingRifts()}/${state.rifts.length}`,
+          `SEALED ${sealedRiftCount()}/${state.rifts.length}`,
           remainingRifts() === 0
             ? "裂隙都封住了，月核即将启动。"
-            : `还剩 ${remainingRifts()} 道裂隙。最低灯值 ${Math.max(0, lowestIntegrity)}。`,
+            : `已封住 ${sealedRiftCount()} 道裂隙，还剩 ${remainingRifts()} 道。最低灯值 ${Math.max(0, lowestIntegrity)}。`,
         );
         if (remainingRifts() === 0) {
           advancePhase();
@@ -1249,7 +1264,7 @@ window.owlMagician = {
       context.fillText(`法杖充能 ${Math.floor(state.player.charge)}`, 26, 34);
       context.fillText(`夜影数量 ${state.wisps.length}`, 26, 60);
       if (state.phaseIndex === 1) {
-        context.fillText(`裂隙 ${remainingRifts()}/${state.rifts.length}`, 26, 86);
+        context.fillText(`已封裂隙 ${sealedRiftCount()}/${state.rifts.length}`, 26, 86);
       }
       if (state.phaseIndex === 2) {
         context.fillText(`月核 ${Math.floor(state.moonCore.charge)}% / ${Math.floor(state.moonCore.integrity)}%`, 26, 86);
