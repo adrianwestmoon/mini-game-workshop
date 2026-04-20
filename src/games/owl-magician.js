@@ -1,4 +1,5 @@
 const OWL_MAGE_BEST_KEY = "mini-game-workshop:owl-magician:best-score";
+const OWL_MAGE_ART = createImageAsset("./assets/art/worldline-concept.png");
 const OWL_MAGE_PHASES = [
   { name: "点亮月灯", status: "MOON RISE" },
   { name: "封印裂隙", status: "RIFT SEAL" },
@@ -801,47 +802,108 @@ window.owlMagician = {
     }
 
     function drawBackground() {
-      const gradient = context.createLinearGradient(0, 0, 0, state.height);
-      gradient.addColorStop(0, "#071228");
-      gradient.addColorStop(0.55, "#162540");
-      gradient.addColorStop(1, "#2e2336");
-      context.fillStyle = gradient;
+      if (OWL_MAGE_ART.ready) {
+        const sourceWidth = OWL_MAGE_ART.image.naturalWidth;
+        const sourceHeight = Math.floor(OWL_MAGE_ART.image.naturalHeight * 0.63);
+        const sourceRatio = sourceWidth / sourceHeight;
+        const targetRatio = state.width / state.height;
+        let drawWidth = sourceWidth;
+        let drawHeight = sourceHeight;
+        let sourceX = 0;
+        let sourceY = 0;
+
+        if (sourceRatio > targetRatio) {
+          drawWidth = Math.floor(sourceHeight * targetRatio);
+          sourceX = Math.floor((sourceWidth - drawWidth) * 0.52);
+        } else {
+          drawHeight = Math.floor(sourceWidth / targetRatio);
+          sourceY = Math.floor((sourceHeight - drawHeight) * 0.28);
+        }
+
+        context.drawImage(OWL_MAGE_ART.image, sourceX, sourceY, drawWidth, drawHeight, 0, 0, state.width, state.height);
+      } else {
+        const gradient = context.createLinearGradient(0, 0, 0, state.height);
+        gradient.addColorStop(0, "#071228");
+        gradient.addColorStop(0.55, "#162540");
+        gradient.addColorStop(1, "#2e2336");
+        context.fillStyle = gradient;
+        context.fillRect(0, 0, state.width, state.height);
+      }
+
+      const glaze = context.createLinearGradient(0, 0, 0, state.height);
+      glaze.addColorStop(0, "rgba(6, 10, 24, 0.18)");
+      glaze.addColorStop(0.48, "rgba(10, 18, 34, 0.34)");
+      glaze.addColorStop(1, "rgba(7, 13, 24, 0.84)");
+      context.fillStyle = glaze;
+      context.fillRect(0, 0, state.width, state.height);
+
+      const aurora = context.createRadialGradient(state.width * 0.53, state.height * 0.12, 10, state.width * 0.53, state.height * 0.12, state.width * 0.38);
+      aurora.addColorStop(0, "rgba(126, 255, 241, 0.54)");
+      aurora.addColorStop(0.24, "rgba(91, 214, 255, 0.28)");
+      aurora.addColorStop(0.68, "rgba(91, 152, 255, 0.08)");
+      aurora.addColorStop(1, "rgba(91, 152, 255, 0)");
+      context.fillStyle = aurora;
       context.fillRect(0, 0, state.width, state.height);
 
       const moonX = state.width * 0.82;
       const moonY = state.height * 0.16;
-      context.fillStyle = "rgba(255, 246, 210, 0.95)";
+      context.fillStyle = "rgba(255, 246, 210, 0.94)";
       context.beginPath();
-      context.arc(moonX, moonY, 38, 0, Math.PI * 2);
+      context.arc(moonX, moonY, 42, 0, Math.PI * 2);
       context.fill();
 
-      context.fillStyle = "rgba(13, 20, 34, 0.18)";
+      context.fillStyle = "rgba(16, 24, 40, 0.22)";
       context.beginPath();
-      context.arc(moonX + 12, moonY - 4, 36, 0, Math.PI * 2);
+      context.arc(moonX + 14, moonY - 4, 39, 0, Math.PI * 2);
       context.fill();
 
-      for (let index = 0; index < 38; index += 1) {
+      for (let index = 0; index < 42; index += 1) {
         const x = ((index * 127) % state.width) + (index % 3) * 12;
         const y = 20 + ((index * 67) % Math.floor(state.height * 0.52));
-        const alpha = 0.25 + ((index * 13) % 50) / 100;
+        const alpha = 0.18 + ((index * 13) % 50) / 140;
         context.fillStyle = `rgba(255, 248, 228, ${alpha})`;
         context.fillRect(x, y, index % 4 === 0 ? 3 : 2, index % 4 === 0 ? 3 : 2);
       }
 
-      const floor = context.createLinearGradient(0, state.height * 0.46, 0, state.height);
-      floor.addColorStop(0, "rgba(44, 66, 62, 0.14)");
-      floor.addColorStop(1, "rgba(20, 32, 26, 0.92)");
+      context.strokeStyle = "rgba(173, 240, 255, 0.42)";
+      context.lineWidth = 4;
+      context.beginPath();
+      context.moveTo(state.width * 0.46, 0);
+      context.bezierCurveTo(state.width * 0.5, state.height * 0.18, state.width * 0.55, state.height * 0.34, state.width * 0.58, state.height * 0.48);
+      context.stroke();
+
+      context.strokeStyle = "rgba(193, 245, 255, 0.28)";
+      context.lineWidth = 2;
+      context.beginPath();
+      context.moveTo(state.width * 0.49, state.height * 0.04);
+      context.bezierCurveTo(state.width * 0.54, state.height * 0.16, state.width * 0.6, state.height * 0.24, state.width * 0.62, state.height * 0.38);
+      context.stroke();
+
+      const floor = context.createLinearGradient(0, state.height * 0.48, 0, state.height);
+      floor.addColorStop(0, "rgba(44, 66, 62, 0.08)");
+      floor.addColorStop(0.52, "rgba(28, 41, 38, 0.52)");
+      floor.addColorStop(1, "rgba(14, 24, 20, 0.96)");
       context.fillStyle = floor;
       context.fillRect(0, state.height * 0.46, state.width, state.height * 0.54);
 
       for (let index = 0; index < 10; index += 1) {
         const baseX = index * (state.width / 9) + (index % 2) * 26;
-        context.fillStyle = "rgba(13, 24, 18, 0.85)";
+        context.fillStyle = "rgba(13, 24, 18, 0.78)";
         context.beginPath();
-        context.moveTo(baseX - 38, state.height);
-        context.lineTo(baseX - 6, state.height * 0.58);
-        context.lineTo(baseX + 22, state.height);
+        context.moveTo(baseX - 48, state.height);
+        context.lineTo(baseX - 10, state.height * (0.56 + (index % 3) * 0.03));
+        context.lineTo(baseX + 28, state.height);
         context.fill();
+      }
+
+      for (let layer = 0; layer < 3; layer += 1) {
+        const y = state.height * (0.66 + layer * 0.09);
+        const mist = context.createLinearGradient(0, y - 32, 0, y + 38);
+        mist.addColorStop(0, "rgba(145, 190, 214, 0)");
+        mist.addColorStop(0.5, `rgba(145, 190, 214, ${0.08 + layer * 0.03})`);
+        mist.addColorStop(1, "rgba(145, 190, 214, 0)");
+        context.fillStyle = mist;
+        context.fillRect(0, y - 34, state.width, 72);
       }
     }
 
@@ -850,23 +912,30 @@ window.owlMagician = {
         context.save();
         context.translate(beacon.x, beacon.y);
 
-        context.fillStyle = "#5e4238";
-        context.fillRect(-6, -8, 12, 54);
-        context.fillStyle = "#87604f";
-        context.fillRect(-10, -16, 20, 12);
+        const pole = context.createLinearGradient(-8, -8, 8, 44);
+        pole.addColorStop(0, "#89604c");
+        pole.addColorStop(0.52, "#604235");
+        pole.addColorStop(1, "#3f2a23");
+        context.fillStyle = pole;
+        context.fillRect(-7, -8, 14, 54);
+        context.fillStyle = "#a97d61";
+        context.fillRect(-12, -18, 24, 14);
 
         if (beacon.lit) {
-          const glow = context.createRadialGradient(0, -20, 4, 0, -20, 54);
+          const glow = context.createRadialGradient(0, -20, 4, 0, -20, 66);
           glow.addColorStop(0, "rgba(255, 241, 183, 0.98)");
           glow.addColorStop(0.35, "rgba(255, 220, 126, 0.64)");
           glow.addColorStop(1, "rgba(255, 201, 96, 0)");
           context.fillStyle = glow;
           context.beginPath();
-          context.arc(0, -20, 54, 0, Math.PI * 2);
+          context.arc(0, -20, 66, 0, Math.PI * 2);
           context.fill();
         }
 
-        context.fillStyle = beacon.lit ? "#ffe9aa" : "#9aa0b8";
+        const lamp = context.createRadialGradient(-4, -24, 3, 0, -20, 18);
+        lamp.addColorStop(0, beacon.lit ? "#fff8d5" : "#d9def1");
+        lamp.addColorStop(1, beacon.lit ? "#ffd96a" : "#8f97b8");
+        context.fillStyle = lamp;
         context.beginPath();
         context.arc(0, -20, 12, 0, Math.PI * 2);
         context.fill();
@@ -910,13 +979,18 @@ window.owlMagician = {
         context.translate(rift.x, rift.y);
         context.rotate(Math.sin(state.elapsed * 3 + rift.phase) * 0.12);
 
-        const glow = context.createRadialGradient(0, 0, 6, 0, 0, 42);
-        glow.addColorStop(0, "rgba(132, 221, 255, 0.7)");
-        glow.addColorStop(0.45, "rgba(95, 126, 255, 0.28)");
+        const glow = context.createRadialGradient(0, 0, 6, 0, 0, 46);
+        glow.addColorStop(0, "rgba(132, 221, 255, 0.78)");
+        glow.addColorStop(0.45, "rgba(95, 126, 255, 0.34)");
         glow.addColorStop(1, "rgba(95, 126, 255, 0)");
         context.fillStyle = glow;
         context.beginPath();
-        context.arc(0, 0, 42, 0, Math.PI * 2);
+        context.arc(0, 0, 46, 0, Math.PI * 2);
+        context.fill();
+
+        context.fillStyle = "rgba(22, 35, 78, 0.46)";
+        context.beginPath();
+        context.ellipse(0, 0, 18, 30, 0, 0, Math.PI * 2);
         context.fill();
 
         context.strokeStyle = "rgba(184, 226, 255, 0.95)";
@@ -957,7 +1031,11 @@ window.owlMagician = {
       context.arc(0, 0, 82, 0, Math.PI * 2);
       context.fill();
 
-      context.fillStyle = "#d6f8ff";
+      const inner = context.createRadialGradient(-6, -8, 4, 0, 0, 28);
+      inner.addColorStop(0, "#fbffff");
+      inner.addColorStop(0.52, "#d6f8ff");
+      inner.addColorStop(1, "#84dfff");
+      context.fillStyle = inner;
       context.beginPath();
       context.arc(0, 0, 24, 0, Math.PI * 2);
       context.fill();
@@ -981,6 +1059,13 @@ window.owlMagician = {
         context.save();
         context.translate(star.x, star.y);
         context.rotate(Math.sin(star.phase) * 0.24);
+        const glow = context.createRadialGradient(0, 0, 2, 0, 0, 18);
+        glow.addColorStop(0, "rgba(255, 245, 180, 0.95)");
+        glow.addColorStop(1, "rgba(255, 245, 180, 0)");
+        context.fillStyle = glow;
+        context.beginPath();
+        context.arc(0, 0, 18, 0, Math.PI * 2);
+        context.fill();
         context.fillStyle = "rgba(255, 244, 170, 0.95)";
         context.beginPath();
         context.moveTo(0, -10);
@@ -1001,9 +1086,26 @@ window.owlMagician = {
       for (const wisp of state.wisps) {
         context.save();
         context.translate(wisp.x, wisp.y);
-        context.fillStyle = wisp.kind === "howler" ? "rgba(82, 42, 108, 0.9)" : "rgba(44, 37, 82, 0.86)";
+        const aura = context.createRadialGradient(0, 0, 6, 0, 0, wisp.radius + 18);
+        aura.addColorStop(0, wisp.kind === "howler" ? "rgba(171, 124, 255, 0.26)" : "rgba(145, 174, 255, 0.24)");
+        aura.addColorStop(1, "rgba(120, 130, 255, 0)");
+        context.fillStyle = aura;
+        context.beginPath();
+        context.arc(0, 0, wisp.radius + 18, 0, Math.PI * 2);
+        context.fill();
+
+        const body = context.createRadialGradient(-4, -6, 2, 0, 0, wisp.radius + 2);
+        body.addColorStop(0, wisp.kind === "howler" ? "rgba(120, 78, 153, 0.98)" : "rgba(92, 87, 155, 0.96)");
+        body.addColorStop(0.62, wisp.kind === "howler" ? "rgba(67, 39, 93, 0.94)" : "rgba(36, 34, 79, 0.94)");
+        body.addColorStop(1, "rgba(16, 17, 41, 0.8)");
+        context.fillStyle = body;
         context.beginPath();
         context.arc(0, 0, wisp.radius, 0, Math.PI * 2);
+        context.fill();
+
+        context.fillStyle = "rgba(255, 255, 255, 0.08)";
+        context.beginPath();
+        context.ellipse(-3, 4, wisp.radius * 0.76, wisp.radius * 0.56, 0, 0, Math.PI * 2);
         context.fill();
 
         context.fillStyle = "rgba(210, 232, 255, 0.92)";
@@ -1034,14 +1136,20 @@ window.owlMagician = {
     function drawMage() {
       context.save();
       context.translate(state.player.x, state.player.y + Math.sin(state.player.bob) * 2);
+      const scarfWave = Math.sin(state.elapsed * 6 + state.player.bob) * 4;
 
       if (state.player.invulnerable > 0 && Math.floor(state.player.invulnerable * 14) % 2 === 0) {
         context.globalAlpha = 0.5;
       }
 
+      context.fillStyle = "rgba(10, 16, 28, 0.22)";
+      context.beginPath();
+      context.ellipse(0, 34, 24, 10, 0, 0, Math.PI * 2);
+      context.fill();
+
       context.fillStyle = "#fedfc1";
       context.beginPath();
-      context.arc(0, -26, 13, 0, Math.PI * 2);
+      context.arc(0, -27, 14, 0, Math.PI * 2);
       context.fill();
 
       context.fillStyle = "rgba(255, 188, 193, 0.8)";
@@ -1061,37 +1169,68 @@ window.owlMagician = {
       context.arc(0, -23, 4.8, 0.2, Math.PI - 0.2);
       context.stroke();
 
-      context.fillStyle = "#1d2854";
+      const hair = context.createLinearGradient(-12, -42, 14, -12);
+      hair.addColorStop(0, "#2f2532");
+      hair.addColorStop(1, "#141722");
+      context.fillStyle = hair;
       context.beginPath();
-      context.moveTo(-18, -28);
-      context.lineTo(0, -54);
-      context.lineTo(16, -24);
+      context.moveTo(-18, -30);
+      context.quadraticCurveTo(-8, -51, 2, -48);
+      context.quadraticCurveTo(13, -46, 16, -26);
+      context.lineTo(12, -12);
+      context.lineTo(-12, -12);
       context.closePath();
       context.fill();
-      context.fillRect(-12, -26, 24, 6);
 
-      context.fillStyle = "#2a4b7c";
-      context.fillRect(-14, -12, 28, 34);
-      context.fillStyle = "#7ce7ff";
-      context.fillRect(-8, -4, 16, 7);
-      context.fillStyle = "#ffd96b";
+      context.fillStyle = "#d8474c";
       context.beginPath();
-      context.moveTo(0, -45);
-      context.lineTo(2, -40);
-      context.lineTo(8, -39);
-      context.lineTo(3, -35);
-      context.lineTo(4, -29);
-      context.lineTo(0, -32);
-      context.lineTo(-4, -29);
-      context.lineTo(-3, -35);
-      context.lineTo(-8, -39);
-      context.lineTo(-2, -40);
+      context.moveTo(8, -16);
+      context.quadraticCurveTo(26 + scarfWave, -8, 18, 8);
+      context.quadraticCurveTo(12, 0, 6, -4);
       context.closePath();
       context.fill();
+
+      const coat = context.createLinearGradient(-18, -10, 18, 30);
+      coat.addColorStop(0, "#335d90");
+      coat.addColorStop(0.58, "#25456f");
+      coat.addColorStop(1, "#162843");
+      context.fillStyle = coat;
+      context.beginPath();
+      context.moveTo(-16, -12);
+      context.quadraticCurveTo(0, -18, 16, -12);
+      context.lineTo(20, 10);
+      context.quadraticCurveTo(0, 28, -20, 10);
+      context.closePath();
+      context.fill();
+
+      context.fillStyle = "#77dfff";
+      context.fillRect(-8, -3, 16, 8);
+
+      context.fillStyle = "#7c261f";
+      context.fillRect(-10, 8, 20, 7);
 
       context.fillStyle = "#f6a27f";
-      context.fillRect(-9, 22, 7, 18);
-      context.fillRect(2, 22, 7, 18);
+      context.fillRect(-10, 20, 8, 18);
+      context.fillRect(2, 20, 8, 18);
+
+      context.fillStyle = "#2b1d1d";
+      context.fillRect(-10, 37, 9, 5);
+      context.fillRect(2, 37, 9, 5);
+
+      context.fillStyle = "#ffd96b";
+      context.beginPath();
+      context.moveTo(0, -43);
+      context.lineTo(2, -39);
+      context.lineTo(8, -38);
+      context.lineTo(3, -34);
+      context.lineTo(4, -28);
+      context.lineTo(0, -31);
+      context.lineTo(-4, -28);
+      context.lineTo(-3, -34);
+      context.lineTo(-8, -38);
+      context.lineTo(-2, -39);
+      context.closePath();
+      context.fill();
 
       context.strokeStyle = "rgba(255, 237, 150, 0.92)";
       context.lineWidth = 4;
@@ -1105,10 +1244,19 @@ window.owlMagician = {
       context.arc(28, 14, 6, 0, Math.PI * 2);
       context.fill();
 
+      context.fillStyle = "#d8474c";
+      context.beginPath();
+      context.moveTo(-2, -8);
+      context.lineTo(-18, -2);
+      context.lineTo(-14, 6);
+      context.lineTo(0, 0);
+      context.closePath();
+      context.fill();
+
       context.strokeStyle = "rgba(255, 238, 172, 0.6)";
       context.lineWidth = 2;
       context.beginPath();
-      context.arc(0, -10, 24, -0.8, 0.4);
+      context.arc(0, -8, 24, -0.8, 0.4);
       context.stroke();
       context.restore();
     }
@@ -1120,10 +1268,24 @@ window.owlMagician = {
 
       context.fillStyle = "rgba(255, 223, 160, 0.2)";
       context.beginPath();
-      context.ellipse(0, 4, 23, 16, 0, 0, Math.PI * 2);
+      context.ellipse(0, 6, 26, 18, 0, 0, Math.PI * 2);
       context.fill();
 
-      context.fillStyle = "#c7904c";
+      context.strokeStyle = "#ad7a4f";
+      context.lineWidth = 7;
+      context.lineCap = "round";
+      context.beginPath();
+      context.moveTo(-12, 5);
+      context.lineTo(-26, -4 - Math.sin(state.elapsed * 6) * 5);
+      context.moveTo(12, 5);
+      context.lineTo(26, -4 + Math.sin(state.elapsed * 6) * 5);
+      context.stroke();
+
+      const owlBody = context.createRadialGradient(-4, -5, 4, 0, 0, 20);
+      owlBody.addColorStop(0, "#ecd3a8");
+      owlBody.addColorStop(0.55, "#c7904c");
+      owlBody.addColorStop(1, "#7d5430");
+      context.fillStyle = owlBody;
       context.beginPath();
       context.ellipse(0, 0, 16, 19, 0, 0, Math.PI * 2);
       context.fill();
@@ -1164,16 +1326,6 @@ window.owlMagician = {
       context.lineTo(-5, 6);
       context.closePath();
       context.fill();
-
-      context.strokeStyle = "#9f6c3f";
-      context.lineWidth = 5;
-      context.lineCap = "round";
-      context.beginPath();
-      context.moveTo(-12, 4);
-      context.lineTo(-22, -2 - Math.sin(state.elapsed * 6) * 4);
-      context.moveTo(12, 4);
-      context.lineTo(22, -2 + Math.sin(state.elapsed * 6) * 4);
-      context.stroke();
       context.restore();
     }
 
@@ -1222,6 +1374,14 @@ window.owlMagician = {
       context.translate(state.spellButton.x, state.spellButton.y);
 
       const ready = state.player.charge >= 24 && state.player.spellCooldown <= 0;
+      const baseGlow = context.createRadialGradient(0, 0, 10, 0, 0, state.spellButton.radius + 14);
+      baseGlow.addColorStop(0, ready ? "rgba(127, 174, 255, 0.32)" : "rgba(82, 96, 140, 0.22)");
+      baseGlow.addColorStop(1, "rgba(40, 60, 118, 0)");
+      context.fillStyle = baseGlow;
+      context.beginPath();
+      context.arc(0, 0, state.spellButton.radius + 14, 0, Math.PI * 2);
+      context.fill();
+
       context.fillStyle = ready ? "rgba(94, 122, 225, 0.38)" : "rgba(52, 66, 110, 0.3)";
       context.beginPath();
       context.arc(0, 0, state.spellButton.radius, 0, Math.PI * 2);
@@ -1419,6 +1579,21 @@ function createMage(overrides = {}) {
     bob: 0,
     ...overrides,
   };
+}
+
+function createImageAsset(src) {
+  const asset = {
+    image: null,
+    ready: false,
+  };
+
+  const image = new Image();
+  image.addEventListener("load", () => {
+    asset.ready = true;
+  });
+  image.src = src;
+  asset.image = image;
+  return asset;
 }
 
 function createOwl() {

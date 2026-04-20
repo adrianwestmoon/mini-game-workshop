@@ -1,4 +1,4 @@
-const APP_BUILD = "2026.04.20-art-integrated";
+const APP_BUILD = "2026.04.20-ingame-paint";
 const CAMPAIGN_PROGRESS_KEY = "mini-game-workshop:campaign-progress";
 
 const CAMPAIGN_CHAPTERS = [
