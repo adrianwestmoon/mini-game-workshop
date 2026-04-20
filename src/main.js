@@ -1,4 +1,4 @@
-const APP_BUILD = "2026.04.20-owl-fix";
+const APP_BUILD = "2026.04.20-campaign-v2";
 const CAMPAIGN_PROGRESS_KEY = "mini-game-workshop:campaign-progress";
 
 const CAMPAIGN_CHAPTERS = [
@@ -8,6 +8,7 @@ const CAMPAIGN_CHAPTERS = [
     title: "牧场失踪案",
     gameId: "moo-mission",
     gameName: "Moo Mission",
+    objective: "找到阿凯小牛并把他带回家",
     intro: {
       speaker: "金声",
       text: "阿凯小牛在暮色前还没回栏。先穿过牧场把他找回来，看看今晚到底出了什么事。",
@@ -24,6 +25,7 @@ const CAMPAIGN_CHAPTERS = [
     title: "黑店取证",
     gameId: "evil-valley-inn",
     gameName: "恶人谷黑店",
+    objective: "拆封印、救阿凯、带着证据冲出黑店",
     intro: {
       speaker: "旁白",
       text: "线索把你们带到恶人谷黑店。金声要潜进去拆掉封印、带着阿凯冲出来，把真相从黑店里挖出来。",
@@ -40,15 +42,52 @@ const CAMPAIGN_CHAPTERS = [
     title: "月夜法阵",
     gameId: "owl-magician",
     gameName: "猫头鹰与魔术师金声",
+    objective: "点亮月灯、封住裂隙、守住月核",
     intro: {
       speaker: "猫头鹰",
       text: "先点亮月灯，再封裂隙，最后守住月核。只要这三步稳住，夜影今晚就压不过来。",
     },
     outro: {
       speaker: "旁白",
-      text: "法阵暂时稳定了，故事的第一段也连起来了。奶龙擂台和夜空裂口还在后面等着你们。",
+      text: "法阵稳住后，一头守关奶龙从林口现身。它不肯让路，除非你在擂台上把它正面打服。",
     },
     winStatus: "OWL CLEAR",
+  },
+  {
+    id: "milk-dragon-duel",
+    label: "第四章",
+    title: "奶龙擂台",
+    gameId: "milk-dragon-brawl",
+    gameName: "金声与奶龙",
+    objective: "打满三回合，赢下守关奶龙",
+    intro: {
+      speaker: "奶龙",
+      text: "你们想继续往前，就先在奶泡擂台上赢我三回合。能过这一关，我就告诉你夜空裂口该怎么进。",
+    },
+    outro: {
+      speaker: "奶龙",
+      text: "行，这条路你们配走。裂口就在天穹上面，开飞船冲进去，把最后那团夜影核心轰散。",
+    },
+    winStatus: "BRAWL CLEAR",
+  },
+  {
+    id: "comet-rift-run",
+    label: "第五章",
+    title: "裂口追击",
+    gameId: "comet-dash",
+    gameName: "Comet Dash",
+    objective: "把分数打到 1500，冲穿夜空裂口",
+    intro: {
+      speaker: "旁白",
+      text: "奶龙让开了路，金声驾驶飞船冲进夜空裂口。这里没有回头路，只有把夜影核心一路打穿。",
+    },
+    outro: {
+      speaker: "金声",
+      text: "裂口已经被轰穿，第一幕的异动终于压下去了。后面可以继续把更多章节和支线接进来。",
+    },
+    isComplete(payload) {
+      return payload.status !== "GAME OVER" && payload.score >= 1500;
+    },
   },
 ];
 
@@ -198,6 +237,7 @@ function renderCampaignProgress() {
         <span class="campaign-step-state">${stateLabel}</span>
       </div>
       <p class="campaign-step-copy">${chapter.gameName}</p>
+      <p class="campaign-step-copy">目标：${chapter.objective}</p>
     `;
 
     elements.campaignProgress.append(step);
@@ -258,7 +298,9 @@ function handleCampaignState(payload) {
     return;
   }
 
-  if (payload.status !== chapter.winStatus || campaign.resolvedChapterId === chapter.id) {
+  const completedByStatus = chapter.winStatus && payload.status === chapter.winStatus;
+  const completedByRule = typeof chapter.isComplete === "function" && chapter.isComplete(payload);
+  if ((!completedByStatus && !completedByRule) || campaign.resolvedChapterId === chapter.id) {
     return;
   }
 
@@ -357,9 +399,9 @@ function showCampaignEnding() {
 
   showStoryOverlay({
     kicker: "剧情模式 · 第一幕完成",
-    title: "月夜暂时稳定",
+    title: "裂口已经闭合",
     speaker: "旁白",
-    text: "阿凯已经回家，黑店线索被撬开，林间法阵也重新站稳。下一段旅程里，奶龙擂台和夜空裂口会继续把故事推远。",
+    text: "阿凯已经回家，黑店线索被撬开，林间法阵重新站稳，奶龙也成了你们的新盟友。第一幕五章已经串完，接下来我们可以继续往第二幕做地图、Boss 和支线。",
     buttonLabel: "回到工作台",
     onConfirm() {
       hideStoryOverlay();
