@@ -7,7 +7,7 @@
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
     <title>Mini Game Workshop</title>
-    <link rel="stylesheet" href="./styles.css?v=20260420-owl-deeper" />
+    <link rel="stylesheet" href="./styles.css?v=20260420-campaign-v1" />
   </head>
   <body>
     <div class="backdrop"></div>
@@ -19,9 +19,12 @@
           <p class="hero-copy">
             先把玩法跑起来，再慢慢打磨表现。这里是我们的试玩台、灵感板和可扩展骨架。
           </p>
-          <p class="build-meta">当前构建 <strong id="build-version">2026.04.20-owl-deeper</strong></p>
+          <p class="build-meta">当前构建 <strong id="build-version">2026.04.20-campaign-v1</strong></p>
         </div>
-        <div class="status-pill" id="status-pill">READY TO BUILD</div>
+        <div class="hero-actions">
+          <button class="campaign-button" id="campaign-button" type="button">开始剧情模式</button>
+          <div class="status-pill" id="status-pill">READY TO BUILD</div>
+        </div>
       </header>
 
       <main class="layout">
@@ -52,6 +55,17 @@
 
           <div class="canvas-frame">
             <canvas id="game-canvas" aria-label="小游戏画布"></canvas>
+            <div class="story-overlay is-hidden" id="story-overlay">
+              <div class="story-card">
+                <p class="story-kicker" id="story-kicker">剧情模式</p>
+                <h3 class="story-title" id="story-title">第一章</h3>
+                <p class="story-speaker" id="story-speaker">旁白</p>
+                <p class="story-copy" id="story-copy">剧情内容</p>
+                <div class="story-actions">
+                  <button class="story-button" id="story-button" type="button">进入本章</button>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div class="footer-bar">
@@ -80,6 +94,10 @@
             <ul id="game-controls" class="info-list"></ul>
           </div>
           <div class="info-block">
+            <p class="info-label">剧情模式</p>
+            <div id="campaign-progress" class="campaign-progress"></div>
+          </div>
+          <div class="info-block">
             <p class="info-label">下一步建议</p>
             <ul class="info-list">
               <li>加入第二个原型，验证项目扩展方式。</li>
@@ -91,12 +109,12 @@
       </main>
     </div>
 
-    <script src="./src/games/comet-dash.js?v=20260420-owl-deeper" defer></script>
-    <script src="./src/games/moo-mission.js?v=20260420-owl-deeper" defer></script>
-    <script src="./src/games/evil-valley-inn.js?v=20260420-owl-deeper" defer></script>
-    <script src="./src/games/owl-magician.js?v=20260420-owl-deeper" defer></script>
-    <script src="./src/games/milk-dragon-brawl.js?v=20260420-owl-deeper" defer></script>
-    <script src="./src/games/index.js?v=20260420-owl-deeper" defer></script>
-    <script src="./src/main.js?v=20260420-owl-deeper" defer></script>
+    <script src="./src/games/comet-dash.js?v=20260420-campaign-v1" defer></script>
+    <script src="./src/games/moo-mission.js?v=20260420-campaign-v1" defer></script>
+    <script src="./src/games/evil-valley-inn.js?v=20260420-campaign-v1" defer></script>
+    <script src="./src/games/owl-magician.js?v=20260420-campaign-v1" defer></script>
+    <script src="./src/games/milk-dragon-brawl.js?v=20260420-campaign-v1" defer></script>
+    <script src="./src/games/index.js?v=20260420-campaign-v1" defer></script>
+    <script src="./src/main.js?v=20260420-campaign-v1" defer></script>
   </body>
 </html>
