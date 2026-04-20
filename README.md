@@ -7,7 +7,7 @@
 ## 现在有什么
 
 - 一个风格化的小游戏工作台首页
-- 四个可玩的 Canvas 示例游戏 `Comet Dash`、`Moo Mission`、`恶人谷黑店` 和 `猫头鹰与魔术师金声`
+- 五个可玩的 Canvas 示例游戏 `Comet Dash`、`Moo Mission`、`恶人谷黑店`、`猫头鹰与魔术师金声` 和 `金声与奶龙`
 - 可扩展的 `src/games/` 目录结构，方便继续加新游戏
 - 一个内置静态服务器 `serve.mjs`
 
@@ -42,6 +42,7 @@ index.html
     ├── games
     │   ├── comet-dash.js
     │   ├── evil-valley-inn.js
+    │   ├── milk-dragon-brawl.js
     │   ├── moo-mission.js
     │   ├── owl-magician.js
     │   └── index.js
@@ -73,6 +74,12 @@ index.html
 - 月夜守灯动作玩法，金声和猫头鹰并肩作战
 - 收集星羽充能，用月光脉冲点亮并稳住三座月灯
 - 夜影会扑向玩家和灯火，需要边走位边补灯
+
+`金声与奶龙`
+
+- 横版擂台格斗玩法，金声对战奶龙
+- 轻拳、跳跃和奶光飞踢三种核心节奏
+- 三回合递进，奶龙会越来越凶
 
 ## 后续怎么加新游戏
 
