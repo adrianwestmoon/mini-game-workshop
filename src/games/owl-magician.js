@@ -148,6 +148,7 @@ window.owlMagician = {
       state.owl = createOwl();
       state.owl.x = state.player.x + 42;
       state.owl.y = state.player.y - 36;
+      clearInputState();
       state.moonCore = createMoonCore({
         x: state.width * 0.52,
         y: state.height * 0.56,
@@ -191,7 +192,16 @@ window.owlMagician = {
       emitState(OWL_MAGE_PHASES[index].status, phaseHint(index));
     }
 
+    function clearInputState() {
+      keys.clear();
+      pointer.active = false;
+      pointer.id = null;
+      pointer.x = state.player.x;
+      pointer.y = state.player.y;
+    }
+
     function resetRun() {
+      clearInputState();
       setupPhase(0, true);
     }
 
@@ -219,6 +229,7 @@ window.owlMagician = {
       }
       state.gameOver = true;
       state.won = true;
+      clearInputState();
       saveBest();
       audio.win();
       burstParticles(state.player.x, state.player.y, "rgba(255, 236, 154, 0.95)", 32, 260, 0.8);
@@ -239,6 +250,7 @@ window.owlMagician = {
 
       if (state.lives <= 0) {
         state.gameOver = true;
+        clearInputState();
         saveBest();
         audio.gameOver();
         emitState("MOON FALL", "月夜法阵失守了，点一下画布重新来。");
@@ -252,6 +264,7 @@ window.owlMagician = {
       state.player.charge = Math.max(state.player.charge, state.phaseIndex === 0 ? 38 : state.phaseIndex === 1 ? 46 : 54);
       state.owl.x = state.player.x + 42;
       state.owl.y = state.player.y - 36;
+      clearInputState();
       state.wisps = [];
       state.particles = [];
       state.spawnTimer = state.phaseIndex === 0 ? 1.1 : state.phaseIndex === 1 ? 0.96 : 0.84;
@@ -1550,6 +1563,7 @@ window.owlMagician = {
     canvas.addEventListener("pointermove", onPointerMove);
     canvas.addEventListener("pointerup", onPointerUp);
     canvas.addEventListener("pointercancel", onPointerUp);
+    canvas.addEventListener("pointerleave", onPointerUp);
     state.rafId = window.requestAnimationFrame(frame);
 
     return {
@@ -1562,6 +1576,7 @@ window.owlMagician = {
         canvas.removeEventListener("pointermove", onPointerMove);
         canvas.removeEventListener("pointerup", onPointerUp);
         canvas.removeEventListener("pointercancel", onPointerUp);
+        canvas.removeEventListener("pointerleave", onPointerUp);
       },
     };
   },
