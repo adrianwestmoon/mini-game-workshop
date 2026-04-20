@@ -1,4 +1,4 @@
-const APP_BUILD = "2026.04.20-campaign-v2";
+const APP_BUILD = "2026.04.20-ui-polish";
 const CAMPAIGN_PROGRESS_KEY = "mini-game-workshop:campaign-progress";
 
 const CAMPAIGN_CHAPTERS = [
