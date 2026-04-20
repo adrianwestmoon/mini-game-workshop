@@ -226,6 +226,16 @@ window.owlMagician = {
         life: 0.38,
         color: litOrHealed ? "rgba(255, 241, 154, 0.95)" : "rgba(120, 228, 255, 0.92)",
       });
+      state.particles.push({
+        kind: "heart",
+        x: state.owl.x,
+        y: state.owl.y - 8,
+        vx: random(-18, 18),
+        vy: random(-52, -26),
+        size: random(8, 12),
+        life: 0.54,
+        color: "rgba(255, 179, 211, 0.92)",
+      });
 
       if (litCount() === state.beacons.length && state.beacons.every((beacon) => beacon.integrity > 34)) {
         finishRun();
@@ -243,6 +253,18 @@ window.owlMagician = {
         life: random(0.4, 0.72),
         color: "rgba(255, 241, 166, 0.92)",
       });
+      state.particles.push({
+        kind: "feather",
+        x: x + random(-4, 4),
+        y: y + random(-4, 4),
+        vx: random(-22, 22),
+        vy: random(-36, -8),
+        size: random(8, 12),
+        rotation: random(-0.7, 0.7),
+        spin: random(-2.2, 2.2),
+        life: random(0.42, 0.72),
+        color: "rgba(255, 223, 185, 0.95)",
+      });
     }
 
     function burstParticles(x, y, color, count, speed, life) {
@@ -258,6 +280,19 @@ window.owlMagician = {
           life: random(life * 0.45, life),
           color,
         });
+
+        if (index % 5 === 0) {
+          state.particles.push({
+            kind: "heart",
+            x: x + random(-10, 10),
+            y: y + random(-10, 10),
+            vx: random(-speed * 0.16, speed * 0.16),
+            vy: random(-speed * 0.22, -speed * 0.08),
+            size: random(7, 11),
+            life: random(life * 0.6, life * 1.05),
+            color: index % 10 === 0 ? "rgba(255, 188, 214, 0.9)" : "rgba(255, 234, 170, 0.92)",
+          });
+        }
       }
     }
 
@@ -344,6 +379,17 @@ window.owlMagician = {
             defeatWisp(index, "rgba(255, 218, 166, 0.92)");
           }
         }
+
+        state.particles.push({
+          kind: "heart",
+          x: state.owl.x,
+          y: state.owl.y - 6,
+          vx: random(-16, 16),
+          vy: random(-40, -18),
+          size: random(6, 10),
+          life: 0.4,
+          color: "rgba(255, 199, 210, 0.88)",
+        });
       }
     }
 
@@ -488,6 +534,9 @@ window.owlMagician = {
         if (particle.radius != null) {
           particle.radius += (particle.growth || 0) * delta;
         }
+        if (particle.rotation != null) {
+          particle.rotation += (particle.spin || 0) * delta;
+        }
         if (particle.life <= 0) {
           state.particles.splice(index, 1);
         }
@@ -599,6 +648,21 @@ window.owlMagician = {
         context.arc(0, -20, 12, 0, Math.PI * 2);
         context.fill();
 
+        context.fillStyle = beacon.lit ? "rgba(255, 248, 223, 0.95)" : "rgba(219, 228, 245, 0.8)";
+        context.beginPath();
+        context.moveTo(0, -33);
+        context.lineTo(3, -25);
+        context.lineTo(12, -24);
+        context.lineTo(5, -18);
+        context.lineTo(7, -9);
+        context.lineTo(0, -14);
+        context.lineTo(-7, -9);
+        context.lineTo(-5, -18);
+        context.lineTo(-12, -24);
+        context.lineTo(-3, -25);
+        context.closePath();
+        context.fill();
+
         context.strokeStyle = beacon.lit ? "rgba(120, 228, 255, 0.85)" : "rgba(120, 140, 180, 0.5)";
         context.lineWidth = 4;
         context.beginPath();
@@ -671,6 +735,23 @@ window.owlMagician = {
       context.arc(0, -26, 13, 0, Math.PI * 2);
       context.fill();
 
+      context.fillStyle = "rgba(255, 188, 193, 0.8)";
+      context.beginPath();
+      context.arc(-7, -23, 2.8, 0, Math.PI * 2);
+      context.arc(7, -23, 2.8, 0, Math.PI * 2);
+      context.fill();
+
+      context.fillStyle = "#1f1f28";
+      context.beginPath();
+      context.arc(-4, -28, 1.6, 0, Math.PI * 2);
+      context.arc(4, -28, 1.6, 0, Math.PI * 2);
+      context.fill();
+      context.strokeStyle = "#1f1f28";
+      context.lineWidth = 1.6;
+      context.beginPath();
+      context.arc(0, -23, 4.8, 0.2, Math.PI - 0.2);
+      context.stroke();
+
       context.fillStyle = "#1d2854";
       context.beginPath();
       context.moveTo(-18, -28);
@@ -684,6 +765,20 @@ window.owlMagician = {
       context.fillRect(-14, -12, 28, 34);
       context.fillStyle = "#7ce7ff";
       context.fillRect(-8, -4, 16, 7);
+      context.fillStyle = "#ffd96b";
+      context.beginPath();
+      context.moveTo(0, -45);
+      context.lineTo(2, -40);
+      context.lineTo(8, -39);
+      context.lineTo(3, -35);
+      context.lineTo(4, -29);
+      context.lineTo(0, -32);
+      context.lineTo(-4, -29);
+      context.lineTo(-3, -35);
+      context.lineTo(-8, -39);
+      context.lineTo(-2, -40);
+      context.closePath();
+      context.fill();
 
       context.fillStyle = "#f6a27f";
       context.fillRect(-9, 22, 7, 18);
@@ -700,6 +795,12 @@ window.owlMagician = {
       context.beginPath();
       context.arc(28, 14, 6, 0, Math.PI * 2);
       context.fill();
+
+      context.strokeStyle = "rgba(255, 238, 172, 0.6)";
+      context.lineWidth = 2;
+      context.beginPath();
+      context.arc(0, -10, 24, -0.8, 0.4);
+      context.stroke();
       context.restore();
     }
 
@@ -707,6 +808,11 @@ window.owlMagician = {
       context.save();
       context.translate(state.owl.x, state.owl.y);
       context.rotate(Math.sin(state.elapsed * 4.8) * 0.12);
+
+      context.fillStyle = "rgba(255, 223, 160, 0.2)";
+      context.beginPath();
+      context.ellipse(0, 4, 23, 16, 0, 0, Math.PI * 2);
+      context.fill();
 
       context.fillStyle = "#c7904c";
       context.beginPath();
@@ -729,6 +835,18 @@ window.owlMagician = {
       context.arc(-5, -4, 2, 0, Math.PI * 2);
       context.arc(5, -4, 2, 0, Math.PI * 2);
       context.fill();
+
+      context.fillStyle = "rgba(255, 194, 202, 0.84)";
+      context.beginPath();
+      context.arc(-8, 1, 2.4, 0, Math.PI * 2);
+      context.arc(8, 1, 2.4, 0, Math.PI * 2);
+      context.fill();
+
+      context.strokeStyle = "#3f2b20";
+      context.lineWidth = 1.6;
+      context.beginPath();
+      context.arc(0, 3, 4.8, 0.12, Math.PI - 0.12);
+      context.stroke();
 
       context.fillStyle = "#f4b15c";
       context.beginPath();
@@ -762,6 +880,25 @@ window.owlMagician = {
           context.beginPath();
           context.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2);
           context.stroke();
+        } else if (particle.kind === "heart") {
+          context.translate(particle.x, particle.y);
+          context.scale((particle.size || 8) / 10, (particle.size || 8) / 10);
+          drawHeartShape(context);
+          context.fill();
+        } else if (particle.kind === "feather") {
+          context.translate(particle.x, particle.y);
+          context.rotate(particle.rotation || 0);
+          const size = particle.size || 10;
+          context.fillStyle = particle.color;
+          context.beginPath();
+          context.ellipse(0, 0, size * 0.42, size, -0.28, 0, Math.PI * 2);
+          context.fill();
+          context.strokeStyle = "rgba(143, 103, 67, 0.5)";
+          context.lineWidth = 1.1;
+          context.beginPath();
+          context.moveTo(0, -size);
+          context.lineTo(0, size * 0.9);
+          context.stroke();
         } else {
           context.beginPath();
           context.arc(particle.x, particle.y, particle.size || 3, 0, Math.PI * 2);
@@ -787,12 +924,27 @@ window.owlMagician = {
       context.arc(0, 0, state.spellButton.radius - 6, 0, Math.PI * 2);
       context.stroke();
 
+      context.fillStyle = ready ? "rgba(255, 228, 138, 0.9)" : "rgba(180, 188, 214, 0.75)";
+      context.beginPath();
+      context.moveTo(0, -28);
+      context.lineTo(5, -18);
+      context.lineTo(16, -16);
+      context.lineTo(7, -9);
+      context.lineTo(10, 2);
+      context.lineTo(0, -4);
+      context.lineTo(-10, 2);
+      context.lineTo(-7, -9);
+      context.lineTo(-16, -16);
+      context.lineTo(-5, -18);
+      context.closePath();
+      context.fill();
+
       context.fillStyle = "#f6fbff";
       context.font = '700 17px "Avenir Next", "Trebuchet MS", sans-serif';
       context.textAlign = "center";
-      context.fillText("SPELL", 0, -2);
+      context.fillText("SPELL", 0, 18);
       context.font = '600 12px "Avenir Next", "Trebuchet MS", sans-serif';
-      context.fillText(`${Math.floor(state.player.charge)}/24`, 0, 18);
+      context.fillText(`${Math.floor(state.player.charge)}/24`, 0, 34);
       context.restore();
     }
 
@@ -1007,6 +1159,14 @@ function random(min, max) {
 
 function getDistance(ax, ay, bx, by) {
   return Math.hypot(ax - bx, ay - by);
+}
+
+function drawHeartShape(context) {
+  context.beginPath();
+  context.moveTo(0, 8);
+  context.bezierCurveTo(10, 1, 10, -8, 0, -4);
+  context.bezierCurveTo(-10, -8, -10, 1, 0, 8);
+  context.closePath();
 }
 
 function createOwlMageAudio() {
