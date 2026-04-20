@@ -1,15 +1,20 @@
 const OWL_MAGE_BEST_KEY = "mini-game-workshop:owl-magician:best-score";
+const OWL_MAGE_PHASES = [
+  { name: "点亮月灯", status: "MOON RISE" },
+  { name: "封印裂隙", status: "RIFT SEAL" },
+  { name: "守住月核", status: "CORE HOLD" },
+];
 
 window.owlMagician = {
   id: "owl-magician",
   title: "猫头鹰与魔术师金声",
   description:
-    "月夜守灯动作游戏。魔术师金声带着猫头鹰穿过林间空地，收集星羽充能、点亮三座月灯、击退夜影并守住法阵。",
+    "月夜法阵动作游戏。魔术师金声带着猫头鹰穿过林间空地，先点亮月灯，再封印裂隙，最后守住月核充能。",
   controls: [
     "拖动屏幕 / 鼠标：移动金声",
     "WASD / 方向键：备用移动",
-    "E / Space：释放月光脉冲，点灯、补灯、清夜影",
-    "收集星羽给法杖充能，守住三座月灯直到全部点亮",
+    "E / Space：释放月光脉冲，点灯、补灯、封裂隙、清夜影",
+    "收集星羽给法杖充能，三阶段依次完成点灯、封印和守核",
   ],
   create(canvas, callbacks) {
     const context = canvas.getContext("2d");
@@ -34,9 +39,13 @@ window.owlMagician = {
       particles: [],
       wisps: [],
       stars: [],
+      rifts: [],
+      phaseIndex: 0,
+      eliteTimer: 0,
       player: createMage(),
       owl: createOwl(),
       beacons: [],
+      moonCore: createMoonCore(),
       spellButton: { x: 0, y: 0, radius: 56 },
     };
 
@@ -59,6 +68,8 @@ window.owlMagician = {
         createBeacon(state.width * 0.52, state.height * 0.2, "云羽月灯"),
         createBeacon(state.width * 0.78, state.height * 0.34, "琥珀月灯"),
       ];
+      state.moonCore.x = state.width * 0.52;
+      state.moonCore.y = state.height * 0.56;
 
       if (!state.gameOver) {
         state.player.x = state.width * 0.5;
@@ -71,7 +82,7 @@ window.owlMagician = {
     function emitState(status, hint) {
       state.status = status;
       callbacks.onStateChange({
-        title: `${window.owlMagician.title} · 月夜守灯`,
+        title: `${window.owlMagician.title} · ${OWL_MAGE_PHASES[state.phaseIndex].name}`,
         description: window.owlMagician.description,
         controls: window.owlMagician.controls,
         score: Math.floor(state.score),
@@ -86,19 +97,45 @@ window.owlMagician = {
       return state.beacons.filter((beacon) => beacon.lit).length;
     }
 
-    function resetRun() {
-      state.elapsed = 0;
-      state.score = 0;
-      state.lives = 4;
+    function remainingRifts() {
+      return state.rifts.filter((rift) => !rift.sealed).length;
+    }
+
+    function populateStars(count) {
+      for (let index = 0; index < count; index += 1) {
+        state.stars.push(createStarFeather(random(state.width * 0.18, state.width * 0.82), random(state.height * 0.2, state.height * 0.76)));
+      }
+    }
+
+    function phaseHint(index) {
+      if (index === 0) {
+        return "先收集星羽，再靠近月灯释放脉冲点亮法阵。";
+      }
+      if (index === 1) {
+        return "裂隙已经张开，靠近后反复放脉冲封住它们，不然夜影会越打越多。";
+      }
+      return "月核开始充能了，至少守住两座月灯，并别让夜影扑穿月核。";
+    }
+
+    function setupPhase(index, resetStats = false) {
+      if (resetStats) {
+        state.elapsed = 0;
+        state.score = 0;
+        state.lives = 4;
+      }
+
+      state.phaseIndex = index;
       state.gameOver = false;
       state.won = false;
       state.shake = 0;
       state.flashTimer = 0;
-      state.spawnTimer = 1.1;
+      state.spawnTimer = index === 0 ? 1.1 : index === 1 ? 0.86 : 0.72;
       state.starTimer = 0.35;
+      state.eliteTimer = index === 2 ? 3.6 : 5.2;
       state.particles = [];
       state.wisps = [];
       state.stars = [];
+      state.rifts = [];
       state.player = createMage({
         x: state.width * 0.5,
         y: state.height * 0.72,
@@ -106,14 +143,64 @@ window.owlMagician = {
       state.owl = createOwl();
       state.owl.x = state.player.x + 42;
       state.owl.y = state.player.y - 36;
+      state.moonCore = createMoonCore({
+        x: state.width * 0.52,
+        y: state.height * 0.56,
+        active: index === 2,
+        integrity: 100,
+        charge: 0,
+      });
       layoutArena();
-      state.player.charge = 42;
 
-      for (let index = 0; index < 4; index += 1) {
-        state.stars.push(createStarFeather(random(state.width * 0.18, state.width * 0.82), random(state.height * 0.2, state.height * 0.76)));
+      if (index === 0) {
+        for (const beacon of state.beacons) {
+          beacon.lit = false;
+          beacon.integrity = 0;
+        }
+        state.player.charge = 42;
+        populateStars(4);
+      } else if (index === 1) {
+        for (const beacon of state.beacons) {
+          beacon.lit = true;
+          beacon.integrity = 84;
+        }
+        state.player.charge = 56;
+        state.rifts = [
+          createRift(state.width * 0.24, state.height * 0.66, "晨露裂隙"),
+          createRift(state.width * 0.54, state.height * 0.36, "云羽裂隙"),
+          createRift(state.width * 0.78, state.height * 0.66, "琥珀裂隙"),
+        ];
+        populateStars(5);
+      } else {
+        for (const beacon of state.beacons) {
+          beacon.lit = true;
+          beacon.integrity = 88;
+        }
+        state.player.charge = 62;
+        state.moonCore.active = true;
+        state.moonCore.integrity = 100;
+        state.moonCore.charge = 0;
+        populateStars(6);
       }
 
-      emitState("MOON RISE", "先收集星羽，再靠近月灯释放脉冲点亮法阵。");
+      emitState(OWL_MAGE_PHASES[index].status, phaseHint(index));
+    }
+
+    function resetRun() {
+      setupPhase(0, true);
+    }
+
+    function advancePhase() {
+      if (state.phaseIndex >= OWL_MAGE_PHASES.length - 1) {
+        finishRun();
+        return;
+      }
+
+      state.score += 120 + state.phaseIndex * 40;
+      state.flashTimer = 0.2;
+      state.shake = 10;
+      audio.win();
+      setupPhase(state.phaseIndex + 1, false);
     }
 
     function saveBest() {
@@ -130,7 +217,7 @@ window.owlMagician = {
       saveBest();
       audio.win();
       burstParticles(state.player.x, state.player.y, "rgba(255, 236, 154, 0.95)", 32, 260, 0.8);
-      emitState("OWL CLEAR", "三座月灯都稳定发光了，点一下画布再跑一轮。");
+      emitState("OWL CLEAR", "点灯、封印、守核都拿下了，点一下画布再跑一轮。");
     }
 
     function failLife() {
@@ -149,15 +236,19 @@ window.owlMagician = {
         state.gameOver = true;
         saveBest();
         audio.gameOver();
-        emitState("MOON FALL", "夜影压过来了，点一下画布重新守灯。");
+        emitState("MOON FALL", "月夜法阵失守了，点一下画布重新来。");
         return;
       }
 
-      state.player.x = state.width * 0.5;
-      state.player.y = state.height * 0.72;
-      state.player.vx = 0;
-      state.player.vy = 0;
-      emitState("HOLD FAST", "别慌，先吃星羽补充能量，再回去点灯。");
+      setupPhase(state.phaseIndex, false);
+      emitState(
+        "HOLD FAST",
+        state.phaseIndex === 2
+          ? "月核这一段要更稳，先守住灯火再补核。"
+          : state.phaseIndex === 1
+            ? "先把裂隙封上，不然夜影会一直长出来。"
+            : "别慌，先吃星羽补充能量，再回去点灯。",
+      );
     }
 
     function tryCastSpell() {
@@ -180,6 +271,7 @@ window.owlMagician = {
 
       const pulseRadius = 126;
       let litOrHealed = false;
+      let phaseProgress = false;
 
       for (const beacon of state.beacons) {
         const distance = getDistance(state.player.x, state.player.y - 10, beacon.x, beacon.y - 16);
@@ -192,11 +284,42 @@ window.owlMagician = {
           beacon.integrity = 100;
           state.score += 90;
           litOrHealed = true;
+          phaseProgress = true;
           burstParticles(beacon.x, beacon.y - 18, "rgba(255, 243, 176, 0.96)", 18, 180, 0.56);
         } else {
           beacon.integrity = Math.min(100, beacon.integrity + 42);
           litOrHealed = true;
           burstParticles(beacon.x, beacon.y - 18, "rgba(120, 230, 255, 0.8)", 10, 120, 0.36);
+        }
+      }
+
+      for (const rift of state.rifts) {
+        if (rift.sealed) {
+          continue;
+        }
+
+        const distance = getDistance(state.player.x, state.player.y - 8, rift.x, rift.y);
+        if (distance > pulseRadius + 10) {
+          continue;
+        }
+
+        rift.integrity = Math.max(0, rift.integrity - 55);
+        phaseProgress = true;
+        burstParticles(rift.x, rift.y, "rgba(168, 209, 255, 0.92)", 14, 150, 0.32);
+        if (rift.integrity <= 0) {
+          rift.sealed = true;
+          state.score += 120;
+          burstParticles(rift.x, rift.y, "rgba(255, 241, 173, 0.95)", 20, 220, 0.52);
+        }
+      }
+
+      if (state.moonCore.active) {
+        const coreDistance = getDistance(state.player.x, state.player.y - 10, state.moonCore.x, state.moonCore.y);
+        if (coreDistance <= pulseRadius + 12) {
+          state.moonCore.integrity = Math.min(100, state.moonCore.integrity + 14);
+          state.moonCore.charge = Math.min(100, state.moonCore.charge + 4);
+          phaseProgress = true;
+          burstParticles(state.moonCore.x, state.moonCore.y, "rgba(128, 230, 255, 0.86)", 12, 120, 0.3);
         }
       }
 
@@ -224,7 +347,7 @@ window.owlMagician = {
         growth: 280,
         lineWidth: 4,
         life: 0.38,
-        color: litOrHealed ? "rgba(255, 241, 154, 0.95)" : "rgba(120, 228, 255, 0.92)",
+        color: phaseProgress || litOrHealed ? "rgba(255, 241, 154, 0.95)" : "rgba(120, 228, 255, 0.92)",
       });
       state.particles.push({
         kind: "heart",
@@ -237,8 +360,11 @@ window.owlMagician = {
         color: "rgba(255, 179, 211, 0.92)",
       });
 
-      if (litCount() === state.beacons.length && state.beacons.every((beacon) => beacon.integrity > 34)) {
-        finishRun();
+      if (state.phaseIndex === 0 && litCount() === state.beacons.length && state.beacons.every((beacon) => beacon.integrity > 72)) {
+        advancePhase();
+      }
+      if (state.phaseIndex === 1 && remainingRifts() === 0) {
+        advancePhase();
       }
     }
 
@@ -298,7 +424,7 @@ window.owlMagician = {
 
     function defeatWisp(index, color) {
       const wisp = state.wisps[index];
-      state.score += 26;
+      state.score += wisp.kind === "howler" ? 42 : 26;
       audio.hit();
       burstParticles(wisp.x, wisp.y, color, 12, 150, 0.36);
       if (Math.random() < 0.52) {
@@ -396,7 +522,7 @@ window.owlMagician = {
     function updateStars(delta) {
       state.starTimer -= delta;
       if (state.starTimer <= 0) {
-        state.starTimer = random(1.1, 1.9);
+        state.starTimer = state.phaseIndex === 2 ? random(0.9, 1.5) : random(1.1, 1.9);
         state.stars.push(createStarFeather(random(80, state.width - 80), random(90, state.height - 120)));
       }
 
@@ -426,7 +552,7 @@ window.owlMagician = {
     function updateBeacons(delta) {
       for (const beacon of state.beacons) {
         if (beacon.lit) {
-          beacon.integrity = Math.max(0, beacon.integrity - delta * 1.25);
+          beacon.integrity = Math.max(0, beacon.integrity - delta * (state.phaseIndex === 2 ? 1.55 : 1.25));
           if (beacon.integrity <= 0) {
             beacon.lit = false;
             beacon.integrity = 0;
@@ -436,40 +562,86 @@ window.owlMagician = {
       }
     }
 
+    function updateRifts(delta) {
+      for (const rift of state.rifts) {
+        if (rift.sealed) {
+          continue;
+        }
+
+        rift.spawnTimer -= delta;
+        if (rift.spawnTimer <= 0) {
+          rift.spawnTimer = random(1.2, 1.8);
+          spawnWisp("drifter", rift);
+          if (Math.random() < 0.34) {
+            spawnWisp("howler", rift);
+          }
+        }
+      }
+    }
+
+    function updateMoonCore(delta) {
+      if (!state.moonCore.active) {
+        return;
+      }
+
+      const lit = litCount();
+      const playerNearCore = getDistance(state.player.x, state.player.y, state.moonCore.x, state.moonCore.y) < 138;
+      if (lit >= 2) {
+        state.moonCore.charge = Math.min(100, state.moonCore.charge + delta * (playerNearCore ? 6.8 : 4.4));
+      } else {
+        state.moonCore.charge = Math.max(0, state.moonCore.charge - delta * 2.2);
+      }
+
+      if (state.moonCore.integrity <= 0) {
+        failLife();
+      }
+    }
+
     function pickWispTarget() {
       const vulnerable = state.beacons.filter((beacon) => beacon.lit);
+      if (state.moonCore.active && Math.random() < 0.42) {
+        return state.moonCore;
+      }
       if (vulnerable.length > 0 && Math.random() < 0.58) {
         return vulnerable[Math.floor(Math.random() * vulnerable.length)];
       }
       return state.player;
     }
 
-    function spawnWisp() {
-      const side = Math.floor(Math.random() * 4);
+    function spawnWisp(kind = null, source = null) {
       let x = 0;
       let y = 0;
 
-      if (side === 0) {
-        x = random(-20, state.width + 20);
-        y = -30;
-      } else if (side === 1) {
-        x = state.width + 30;
-        y = random(-20, state.height + 20);
-      } else if (side === 2) {
-        x = random(-20, state.width + 20);
-        y = state.height + 30;
+      if (source) {
+        x = source.x + random(-12, 12);
+        y = source.y + random(-12, 12);
       } else {
-        x = -30;
-        y = random(-20, state.height + 20);
+        const side = Math.floor(Math.random() * 4);
+        if (side === 0) {
+          x = random(-20, state.width + 20);
+          y = -30;
+        } else if (side === 1) {
+          x = state.width + 30;
+          y = random(-20, state.height + 20);
+        } else if (side === 2) {
+          x = random(-20, state.width + 20);
+          y = state.height + 30;
+        } else {
+          x = -30;
+          y = random(-20, state.height + 20);
+        }
       }
 
+      const resolvedKind = kind || (state.phaseIndex > 0 && Math.random() < 0.22 ? "howler" : "drifter");
+      const elite = resolvedKind === "howler";
       state.wisps.push({
         x,
         y,
-        radius: random(14, 18),
-        speed: random(52, 86) + litCount() * 6 + Math.min(36, state.elapsed * 1.2),
-        hp: Math.random() < 0.3 ? 3 : 2,
-        wobble: random(2.2, 4.8),
+        kind: resolvedKind,
+        radius: elite ? random(18, 23) : random(14, 18),
+        speed: (elite ? random(84, 114) : random(52, 86)) + litCount() * 6 + Math.min(40, state.elapsed * 1.25),
+        hp: elite ? 4 : Math.random() < 0.3 ? 3 : 2,
+        wobble: elite ? random(3.8, 6.4) : random(2.2, 4.8),
         phase: random(0, Math.PI * 2),
         stun: 0,
         target: pickWispTarget(),
@@ -479,13 +651,23 @@ window.owlMagician = {
     function updateWisps(delta) {
       state.spawnTimer -= delta;
       if (state.spawnTimer <= 0) {
-        state.spawnTimer = Math.max(0.42, 1.2 - state.elapsed * 0.015);
+        state.spawnTimer = Math.max(state.phaseIndex === 2 ? 0.34 : 0.42, (state.phaseIndex === 0 ? 1.2 : state.phaseIndex === 1 ? 0.94 : 0.78) - state.elapsed * 0.012);
         spawnWisp();
+      }
+
+      state.eliteTimer -= delta;
+      if (state.phaseIndex > 0 && state.eliteTimer <= 0) {
+        state.eliteTimer = state.phaseIndex === 2 ? random(3.1, 4.4) : random(4.6, 6.2);
+        spawnWisp("howler");
       }
 
       for (let index = state.wisps.length - 1; index >= 0; index -= 1) {
         const wisp = state.wisps[index];
-        if (!wisp.target || (wisp.target !== state.player && !wisp.target.lit)) {
+        if (
+          !wisp.target ||
+          (wisp.target !== state.player && wisp.target !== state.moonCore && !wisp.target.lit) ||
+          (wisp.target === state.moonCore && !state.moonCore.active)
+        ) {
           wisp.target = pickWispTarget();
         }
 
@@ -493,13 +675,13 @@ window.owlMagician = {
         wisp.phase += delta * wisp.wobble;
         const speedScale = wisp.stun > 0 ? 0.24 : 1;
         const targetX = wisp.target.x;
-        const targetY = wisp.target === state.player ? wisp.target.y - 10 : wisp.target.y - 18;
+        const targetY = wisp.target === state.player ? wisp.target.y - 10 : wisp.target === state.moonCore ? wisp.target.y : wisp.target.y - 18;
         const dx = targetX - wisp.x;
         const dy = targetY - wisp.y;
         const distance = Math.hypot(dx, dy) || 1;
 
         wisp.x += (dx / distance) * wisp.speed * speedScale * delta;
-        wisp.y += (dy / distance) * wisp.speed * speedScale * delta + Math.sin(wisp.phase) * 12 * delta;
+        wisp.y += (dy / distance) * wisp.speed * speedScale * delta + Math.sin(wisp.phase) * (wisp.kind === "howler" ? 18 : 12) * delta;
 
         if (getDistance(wisp.x, wisp.y, state.player.x, state.player.y - 6) < wisp.radius + 16) {
           failLife();
@@ -514,12 +696,20 @@ window.owlMagician = {
 
           const beaconDistance = getDistance(wisp.x, wisp.y, beacon.x, beacon.y - 18);
           if (beaconDistance < wisp.radius + 22) {
-            beacon.integrity = Math.max(0, beacon.integrity - delta * 26);
+            beacon.integrity = Math.max(0, beacon.integrity - delta * (wisp.kind === "howler" ? 42 : 26));
             burstParticles(beacon.x, beacon.y - 18, "rgba(109, 144, 190, 0.24)", 1, 50, 0.12);
             if (beacon.integrity <= 0) {
               beacon.lit = false;
               burstParticles(beacon.x, beacon.y - 18, "rgba(92, 108, 138, 0.75)", 14, 140, 0.42);
             }
+          }
+        }
+
+        if (state.moonCore.active) {
+          const coreDistance = getDistance(wisp.x, wisp.y, state.moonCore.x, state.moonCore.y);
+          if (coreDistance < wisp.radius + 28) {
+            state.moonCore.integrity = Math.max(0, state.moonCore.integrity - delta * (wisp.kind === "howler" ? 34 : 18));
+            burstParticles(state.moonCore.x, state.moonCore.y, "rgba(123, 214, 255, 0.18)", 1, 40, 0.12);
           }
         }
       }
@@ -560,20 +750,38 @@ window.owlMagician = {
       updateOwl(delta);
       updateStars(delta);
       updateBeacons(delta);
+      updateRifts(delta);
       updateWisps(delta);
+      updateMoonCore(delta);
       updateParticles(delta);
 
       const lit = litCount();
       const lowestIntegrity = Math.floor(Math.min(...state.beacons.map((beacon) => (beacon.lit ? beacon.integrity : 0))));
-      emitState(
-        `LIGHT ${lit}/${state.beacons.length}`,
-        lit === state.beacons.length
-          ? `三座月灯都点亮了，稳住灯火。当前最低灯值 ${Math.max(0, lowestIntegrity)}。`
-          : `还差 ${state.beacons.length - lit} 座月灯。法杖充能 ${Math.floor(state.player.charge)}。`,
-      );
-
-      if (lit === state.beacons.length && state.beacons.every((beacon) => beacon.integrity > 72)) {
-        finishRun();
+      if (state.phaseIndex === 0) {
+        emitState(
+          `LIGHT ${lit}/${state.beacons.length}`,
+          lit === state.beacons.length
+            ? `三座月灯都点亮了，稳住灯火。当前最低灯值 ${Math.max(0, lowestIntegrity)}。`
+            : `还差 ${state.beacons.length - lit} 座月灯。法杖充能 ${Math.floor(state.player.charge)}。`,
+        );
+      } else if (state.phaseIndex === 1) {
+        emitState(
+          `SEAL ${remainingRifts()}/${state.rifts.length}`,
+          remainingRifts() === 0
+            ? "裂隙都封住了，月核即将启动。"
+            : `还剩 ${remainingRifts()} 道裂隙。最低灯值 ${Math.max(0, lowestIntegrity)}。`,
+        );
+        if (remainingRifts() === 0) {
+          advancePhase();
+        }
+      } else {
+        emitState(
+          `CORE ${Math.floor(state.moonCore.charge)}%`,
+          `月核 ${Math.floor(state.moonCore.integrity)}%，点亮 ${lit} 座月灯。最低灯值 ${Math.max(0, lowestIntegrity)}。`,
+        );
+        if (state.moonCore.charge >= 100) {
+          finishRun();
+        }
       }
     }
 
@@ -677,6 +885,82 @@ window.owlMagician = {
       }
     }
 
+    function drawRifts() {
+      for (const rift of state.rifts) {
+        if (rift.sealed) {
+          continue;
+        }
+
+        context.save();
+        context.translate(rift.x, rift.y);
+        context.rotate(Math.sin(state.elapsed * 3 + rift.phase) * 0.12);
+
+        const glow = context.createRadialGradient(0, 0, 6, 0, 0, 42);
+        glow.addColorStop(0, "rgba(132, 221, 255, 0.7)");
+        glow.addColorStop(0.45, "rgba(95, 126, 255, 0.28)");
+        glow.addColorStop(1, "rgba(95, 126, 255, 0)");
+        context.fillStyle = glow;
+        context.beginPath();
+        context.arc(0, 0, 42, 0, Math.PI * 2);
+        context.fill();
+
+        context.strokeStyle = "rgba(184, 226, 255, 0.95)";
+        context.lineWidth = 4;
+        context.beginPath();
+        context.ellipse(0, 0, 18, 28, 0, 0, Math.PI * 2);
+        context.stroke();
+
+        context.strokeStyle = "rgba(121, 167, 255, 0.88)";
+        context.lineWidth = 3;
+        context.beginPath();
+        context.moveTo(-8, -20);
+        context.lineTo(0, -4);
+        context.lineTo(9, 12);
+        context.stroke();
+
+        context.fillStyle = "rgba(255, 251, 241, 0.9)";
+        context.font = '600 11px "Avenir Next", "Trebuchet MS", sans-serif';
+        context.textAlign = "center";
+        context.fillText(`${Math.ceil(rift.integrity)}%`, 0, 46);
+        context.restore();
+      }
+    }
+
+    function drawMoonCore() {
+      if (!state.moonCore.active) {
+        return;
+      }
+
+      context.save();
+      context.translate(state.moonCore.x, state.moonCore.y);
+      const glow = context.createRadialGradient(0, 0, 10, 0, 0, 82);
+      glow.addColorStop(0, "rgba(173, 248, 255, 0.9)");
+      glow.addColorStop(0.3, "rgba(110, 230, 255, 0.42)");
+      glow.addColorStop(1, "rgba(110, 230, 255, 0)");
+      context.fillStyle = glow;
+      context.beginPath();
+      context.arc(0, 0, 82, 0, Math.PI * 2);
+      context.fill();
+
+      context.fillStyle = "#d6f8ff";
+      context.beginPath();
+      context.arc(0, 0, 24, 0, Math.PI * 2);
+      context.fill();
+
+      context.strokeStyle = "rgba(132, 232, 255, 0.92)";
+      context.lineWidth = 6;
+      context.beginPath();
+      context.arc(0, 0, 36, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * (state.moonCore.charge / 100));
+      context.stroke();
+
+      context.strokeStyle = "rgba(255, 240, 190, 0.8)";
+      context.lineWidth = 4;
+      context.beginPath();
+      context.arc(0, 0, 48, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * (state.moonCore.integrity / 100));
+      context.stroke();
+      context.restore();
+    }
+
     function drawStars() {
       for (const star of state.stars) {
         context.save();
@@ -702,7 +986,7 @@ window.owlMagician = {
       for (const wisp of state.wisps) {
         context.save();
         context.translate(wisp.x, wisp.y);
-        context.fillStyle = "rgba(44, 37, 82, 0.86)";
+        context.fillStyle = wisp.kind === "howler" ? "rgba(82, 42, 108, 0.9)" : "rgba(44, 37, 82, 0.86)";
         context.beginPath();
         context.arc(0, 0, wisp.radius, 0, Math.PI * 2);
         context.fill();
@@ -712,6 +996,16 @@ window.owlMagician = {
         context.arc(-4, -3, 2.8, 0, Math.PI * 2);
         context.arc(4, -3, 2.8, 0, Math.PI * 2);
         context.fill();
+
+        if (wisp.kind === "howler") {
+          context.strokeStyle = "rgba(255, 188, 154, 0.95)";
+          context.lineWidth = 2;
+          context.beginPath();
+          context.moveTo(-8, -12);
+          context.lineTo(0, -20);
+          context.lineTo(8, -12);
+          context.stroke();
+        }
 
         context.strokeStyle = "rgba(125, 168, 255, 0.85)";
         context.lineWidth = 2;
@@ -952,8 +1246,14 @@ window.owlMagician = {
       context.fillStyle = "rgba(255, 255, 255, 0.86)";
       context.font = '700 18px "Avenir Next", "Trebuchet MS", sans-serif';
       context.textAlign = "left";
-      context.fillText(`Charge ${Math.floor(state.player.charge)}`, 26, 34);
-      context.fillText(`Night Wisp ${state.wisps.length}`, 26, 60);
+      context.fillText(`法杖充能 ${Math.floor(state.player.charge)}`, 26, 34);
+      context.fillText(`夜影数量 ${state.wisps.length}`, 26, 60);
+      if (state.phaseIndex === 1) {
+        context.fillText(`裂隙 ${remainingRifts()}/${state.rifts.length}`, 26, 86);
+      }
+      if (state.phaseIndex === 2) {
+        context.fillText(`月核 ${Math.floor(state.moonCore.charge)}% / ${Math.floor(state.moonCore.integrity)}%`, 26, 86);
+      }
 
       if (state.flashTimer > 0) {
         context.fillStyle = `rgba(255, 245, 186, ${state.flashTimer * 0.45})`;
@@ -989,6 +1289,8 @@ window.owlMagician = {
 
       drawBackground();
       drawBeacons();
+      drawRifts();
+      drawMoonCore();
       drawStars();
       drawWisps();
       drawMage();
@@ -1120,6 +1422,29 @@ function createBeacon(x, y, name) {
     name,
     lit: false,
     integrity: 0,
+  };
+}
+
+function createRift(x, y, name) {
+  return {
+    x,
+    y,
+    name,
+    integrity: 100,
+    sealed: false,
+    spawnTimer: random(0.8, 1.4),
+    phase: random(0, Math.PI * 2),
+  };
+}
+
+function createMoonCore(overrides = {}) {
+  return {
+    x: 480,
+    y: 300,
+    integrity: 100,
+    charge: 0,
+    active: false,
+    ...overrides,
   };
 }
 

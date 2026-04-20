@@ -1,4 +1,4 @@
-const APP_BUILD = "2026.04.20-milk-brawl";
+const APP_BUILD = "2026.04.20-owl-deeper";
 
 const elements = {
   best: document.querySelector("#best-value"),
