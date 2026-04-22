@@ -1,4 +1,4 @@
-const APP_BUILD = "2026.04.22-character-polish";
+const APP_BUILD = "2026.04.23-starfield-demo";
 const CAMPAIGN_PROGRESS_KEY = "mini-game-workshop:campaign-progress";
 
 const CAMPAIGN_CHAPTERS = [
