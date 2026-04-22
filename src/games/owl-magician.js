@@ -21,7 +21,7 @@ window.owlMagician = {
     const context = canvas.getContext("2d");
     const audio = createOwlMageAudio();
     const keys = new Set();
-    const pointer = { active: false, id: null, x: 0, y: 0 };
+    const pointer = { active: false, id: null, x: 0, y: 0, rearm: false };
     const state = {
       width: 960,
       height: 540,
@@ -198,6 +198,7 @@ window.owlMagician = {
       pointer.id = null;
       pointer.x = state.player.x;
       pointer.y = state.player.y;
+      pointer.rearm = true;
     }
 
     function resetRun() {
@@ -1173,9 +1174,23 @@ window.owlMagician = {
       context.ellipse(0, 34, 24, 10, 0, 0, Math.PI * 2);
       context.fill();
 
+      const halo = context.createRadialGradient(0, -4, 6, 0, -4, 38);
+      halo.addColorStop(0, "rgba(132, 231, 255, 0.22)");
+      halo.addColorStop(0.58, "rgba(132, 231, 255, 0.1)");
+      halo.addColorStop(1, "rgba(132, 231, 255, 0)");
+      context.fillStyle = halo;
+      context.beginPath();
+      context.arc(0, -4, 38, 0, Math.PI * 2);
+      context.fill();
+
       context.fillStyle = "#fedfc1";
       context.beginPath();
       context.arc(0, -27, 14, 0, Math.PI * 2);
+      context.fill();
+
+      context.fillStyle = "rgba(255, 255, 255, 0.22)";
+      context.beginPath();
+      context.arc(-4, -31, 5, 0, Math.PI * 2);
       context.fill();
 
       context.fillStyle = "rgba(255, 188, 193, 0.8)";
@@ -1216,6 +1231,14 @@ window.owlMagician = {
       context.closePath();
       context.fill();
 
+      context.fillStyle = "rgba(255, 220, 220, 0.18)";
+      context.beginPath();
+      context.moveTo(11, -14);
+      context.quadraticCurveTo(22 + scarfWave * 0.4, -8, 16, 1);
+      context.quadraticCurveTo(10, -1, 8, -5);
+      context.closePath();
+      context.fill();
+
       const coat = context.createLinearGradient(-18, -10, 18, 30);
       coat.addColorStop(0, "#335d90");
       coat.addColorStop(0.58, "#25456f");
@@ -1231,6 +1254,9 @@ window.owlMagician = {
 
       context.fillStyle = "#77dfff";
       context.fillRect(-8, -3, 16, 8);
+
+      context.fillStyle = "rgba(255, 255, 255, 0.18)";
+      context.fillRect(-8, -3, 6, 8);
 
       context.fillStyle = "#7c261f";
       context.fillRect(-10, 8, 20, 7);
@@ -1265,6 +1291,22 @@ window.owlMagician = {
       context.lineTo(26, 12);
       context.stroke();
 
+      context.strokeStyle = "rgba(214, 246, 255, 0.38)";
+      context.lineWidth = 2;
+      context.beginPath();
+      context.moveTo(15, -11);
+      context.lineTo(25, 11);
+      context.stroke();
+
+      const wandGlow = context.createRadialGradient(28, 14, 1, 28, 14, 18);
+      wandGlow.addColorStop(0, "rgba(255, 250, 220, 0.98)");
+      wandGlow.addColorStop(0.48, "rgba(255, 236, 145, 0.78)");
+      wandGlow.addColorStop(1, "rgba(255, 236, 145, 0)");
+      context.fillStyle = wandGlow;
+      context.beginPath();
+      context.arc(28, 14, 18, 0, Math.PI * 2);
+      context.fill();
+
       context.fillStyle = "rgba(255, 246, 173, 0.95)";
       context.beginPath();
       context.arc(28, 14, 6, 0, Math.PI * 2);
@@ -1291,6 +1333,14 @@ window.owlMagician = {
       context.save();
       context.translate(state.owl.x, state.owl.y);
       context.rotate(Math.sin(state.elapsed * 4.8) * 0.12);
+
+      const owlHalo = context.createRadialGradient(0, 2, 5, 0, 2, 28);
+      owlHalo.addColorStop(0, "rgba(255, 222, 165, 0.2)");
+      owlHalo.addColorStop(1, "rgba(255, 222, 165, 0)");
+      context.fillStyle = owlHalo;
+      context.beginPath();
+      context.arc(0, 2, 28, 0, Math.PI * 2);
+      context.fill();
 
       context.fillStyle = "rgba(255, 223, 160, 0.2)";
       context.beginPath();
@@ -1319,6 +1369,11 @@ window.owlMagician = {
       context.fillStyle = "#f9e8ca";
       context.beginPath();
       context.ellipse(0, 4, 11, 11, 0, 0, Math.PI * 2);
+      context.fill();
+
+      context.fillStyle = "rgba(255, 255, 255, 0.18)";
+      context.beginPath();
+      context.ellipse(-3, -2, 5, 7, -0.2, 0, Math.PI * 2);
       context.fill();
 
       context.fillStyle = "#fff";
@@ -1352,6 +1407,13 @@ window.owlMagician = {
       context.lineTo(-5, 6);
       context.closePath();
       context.fill();
+
+      context.strokeStyle = "rgba(255, 239, 202, 0.38)";
+      context.lineWidth = 1.4;
+      context.beginPath();
+      context.moveTo(-10, 2);
+      context.quadraticCurveTo(0, 10, 10, 2);
+      context.stroke();
       context.restore();
     }
 
@@ -1536,9 +1598,17 @@ window.owlMagician = {
 
       pointer.active = true;
       pointer.id = event.pointerId;
+      pointer.rearm = false;
     }
 
     function onPointerMove(event) {
+      const canRearArmHeldTouch = !pointer.active && pointer.rearm && (event.buttons > 0 || event.pressure > 0 || event.pointerType === "touch");
+      if (canRearArmHeldTouch) {
+        pointer.active = true;
+        pointer.id = event.pointerId;
+        pointer.rearm = false;
+      }
+
       if (!pointer.active || event.pointerId !== pointer.id) {
         return;
       }
@@ -1549,6 +1619,7 @@ window.owlMagician = {
       if (event.pointerId === pointer.id) {
         pointer.active = false;
         pointer.id = null;
+        pointer.rearm = false;
       }
     }
 
