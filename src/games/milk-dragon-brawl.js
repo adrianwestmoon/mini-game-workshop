@@ -588,7 +588,23 @@ window.milkDragonBrawl = {
 
     function drawJinsheng(actor) {
       const bodyLean = actor.attack ? 4 : 0;
-      context.fillStyle = "#fee1c8";
+      context.fillStyle = "rgba(26, 16, 28, 0.22)";
+      context.beginPath();
+      context.ellipse(0, 6, 24, 8, 0, 0, Math.PI * 2);
+      context.fill();
+
+      const aura = context.createRadialGradient(0, -48, 8, 0, -48, 48);
+      aura.addColorStop(0, "rgba(124, 231, 255, 0.18)");
+      aura.addColorStop(1, "rgba(124, 231, 255, 0)");
+      context.fillStyle = aura;
+      context.beginPath();
+      context.arc(0, -48, 48, 0, Math.PI * 2);
+      context.fill();
+
+      const face = context.createRadialGradient(-5, -90, 4, 0, -84, 20);
+      face.addColorStop(0, "#fff0d8");
+      face.addColorStop(1, "#fee1c8");
+      context.fillStyle = face;
       context.beginPath();
       context.arc(0, -84, 18, 0, Math.PI * 2);
       context.fill();
@@ -597,6 +613,19 @@ window.milkDragonBrawl = {
       context.beginPath();
       context.arc(-9, -80, 3.4, 0, Math.PI * 2);
       context.arc(9, -80, 3.4, 0, Math.PI * 2);
+      context.fill();
+
+      const hair = context.createLinearGradient(-16, -104, 14, -68);
+      hair.addColorStop(0, "#272133");
+      hair.addColorStop(1, "#172037");
+      context.fillStyle = hair;
+      context.beginPath();
+      context.moveTo(-18, -84);
+      context.quadraticCurveTo(-14, -102, 2, -100);
+      context.quadraticCurveTo(18, -96, 14, -76);
+      context.lineTo(8, -68);
+      context.lineTo(-14, -68);
+      context.closePath();
       context.fill();
 
       context.fillStyle = "#172037";
@@ -610,10 +639,22 @@ window.milkDragonBrawl = {
       context.arc(0, -81, 5.2, 0.2, Math.PI - 0.2);
       context.stroke();
 
-      context.fillStyle = "#203766";
-      context.fillRect(-20, -66, 40, 46);
+      const coat = context.createLinearGradient(-22, -66, 22, -8);
+      coat.addColorStop(0, "#466ca8");
+      coat.addColorStop(0.52, "#203766");
+      coat.addColorStop(1, "#11203d");
+      context.fillStyle = coat;
+      context.beginPath();
+      context.moveTo(-20, -66);
+      context.lineTo(20, -66);
+      context.lineTo(24, -18);
+      context.lineTo(-24, -18);
+      context.closePath();
+      context.fill();
       context.fillStyle = actor.scarf;
       context.fillRect(-14, -56, 28, 9);
+      context.fillStyle = "rgba(255, 255, 255, 0.22)";
+      context.fillRect(-14, -56, 10, 9);
       context.fillStyle = actor.accent;
       context.fillRect(-6, -66, 12, 8);
 
@@ -651,13 +692,40 @@ window.milkDragonBrawl = {
       context.lineTo(-4, -100);
       context.closePath();
       context.fill();
+
+      context.fillStyle = "rgba(255, 255, 255, 0.18)";
+      context.beginPath();
+      context.arc(-4, -90, 5, 0, Math.PI * 2);
+      context.fill();
     }
 
     function drawMilkDragon(actor, enemy) {
       const tailSwing = Math.sin(state.elapsed * 7) * 10;
-      context.fillStyle = "#ffbd73";
+      context.fillStyle = "rgba(30, 16, 12, 0.24)";
+      context.beginPath();
+      context.ellipse(0, 8, 38, 10, 0, 0, Math.PI * 2);
+      context.fill();
+
+      const dragonAura = context.createRadialGradient(0, -54, 10, 0, -54, 64);
+      dragonAura.addColorStop(0, "rgba(255, 224, 170, 0.16)");
+      dragonAura.addColorStop(1, "rgba(255, 224, 170, 0)");
+      context.fillStyle = dragonAura;
+      context.beginPath();
+      context.arc(0, -54, 64, 0, Math.PI * 2);
+      context.fill();
+
+      const body = context.createLinearGradient(-30, -84, 30, -8);
+      body.addColorStop(0, "#ffd69e");
+      body.addColorStop(0.52, "#ffbd73");
+      body.addColorStop(1, "#d67a41");
+      context.fillStyle = body;
       context.beginPath();
       context.ellipse(0, -54, 34, 42, 0, 0, Math.PI * 2);
+      context.fill();
+
+      context.fillStyle = "rgba(255, 255, 255, 0.16)";
+      context.beginPath();
+      context.ellipse(-6, -64, 14, 18, -0.3, 0, Math.PI * 2);
       context.fill();
 
       context.fillStyle = "#ffe7c4";
@@ -726,6 +794,20 @@ window.milkDragonBrawl = {
         context.arc(26, -54, 24, -0.7, 0.8);
         context.stroke();
       }
+
+      context.fillStyle = "#fff1d2";
+      context.beginPath();
+      context.moveTo(10, -32);
+      context.lineTo(18, -18);
+      context.lineTo(4, -20);
+      context.closePath();
+      context.fill();
+      context.beginPath();
+      context.moveTo(-2, -30);
+      context.lineTo(6, -14);
+      context.lineTo(-8, -16);
+      context.closePath();
+      context.fill();
 
       if (enemy && enemy.hp < enemy.maxHp * 0.4) {
         context.fillStyle = "rgba(255, 236, 150, 0.26)";

@@ -761,37 +761,105 @@ window.evilValleyInn = {
         context.globalAlpha = enemy.stun > 0 ? 0.55 : 1;
 
         if (enemy.kind === "penfire-yue") {
-          context.fillStyle = "#ff9867";
+          context.fillStyle = "rgba(17, 10, 16, 0.24)";
+          context.beginPath();
+          context.ellipse(0, 28, 20, 8, 0, 0, Math.PI * 2);
+          context.fill();
+
+          const face = context.createRadialGradient(-4, -5, 2, 0, 0, 20);
+          face.addColorStop(0, "#ffc29d");
+          face.addColorStop(1, "#ff9867");
+          context.fillStyle = face;
           context.beginPath();
           context.arc(0, 0, 18, 0, Math.PI * 2);
           context.fill();
           context.fillStyle = "#fff3df";
-          context.fillRect(-9, -24, 18, 10);
+          context.fillRect(-9, -25, 18, 11);
+          context.fillStyle = "#2a1725";
+          context.beginPath();
+          context.moveTo(-11, -8);
+          context.quadraticCurveTo(0, -22, 12, -6);
+          context.lineTo(12, 2);
+          context.lineTo(-12, 2);
+          context.closePath();
+          context.fill();
           context.fillStyle = "#3f1b14";
           context.beginPath();
           context.arc(-5, -2, 2.2, 0, Math.PI * 2);
           context.arc(5, -2, 2.2, 0, Math.PI * 2);
           context.fill();
-          context.fillRect(-8, 8, 16, 3);
+          context.strokeStyle = "#7f2b15";
+          context.lineWidth = 2.2;
+          context.beginPath();
+          context.arc(0, 8, 8, 0.18, Math.PI - 0.18);
+          context.stroke();
         }
 
         if (enemy.kind === "xi-master") {
-          context.fillStyle = "#7edcff";
-          context.fillRect(-20, -20, 40, 40);
+          context.fillStyle = "rgba(17, 10, 16, 0.22)";
+          context.beginPath();
+          context.ellipse(0, 28, 22, 9, 0, 0, Math.PI * 2);
+          context.fill();
+
+          const robe = context.createLinearGradient(-20, -22, 20, 22);
+          robe.addColorStop(0, "#baf5ff");
+          robe.addColorStop(0.52, "#7edcff");
+          robe.addColorStop(1, "#2873a1");
+          context.fillStyle = robe;
+          context.beginPath();
+          context.moveTo(-20, 18);
+          context.lineTo(-12, -18);
+          context.lineTo(12, -18);
+          context.lineTo(20, 18);
+          context.closePath();
+          context.fill();
           context.fillStyle = "#10263b";
           context.fillRect(-12, -12, 24, 24);
+          context.fillStyle = "rgba(255, 255, 255, 0.16)";
+          context.fillRect(-12, -12, 8, 24);
           context.fillStyle = "#d9ff7e";
           context.fillRect(-8, 8, 16, 4);
+          context.fillStyle = "#dff2ff";
+          context.beginPath();
+          context.arc(0, -22, 11, 0, Math.PI * 2);
+          context.fill();
+          context.fillStyle = "#20344d";
+          context.beginPath();
+          context.arc(-3, -23, 1.8, 0, Math.PI * 2);
+          context.arc(3, -23, 1.8, 0, Math.PI * 2);
+          context.fill();
         }
 
         if (enemy.kind === "lychee-monk") {
-          context.fillStyle = "#b86eff";
+          context.fillStyle = "rgba(17, 10, 16, 0.22)";
           context.beginPath();
-          context.arc(0, 0, 17, 0, Math.PI * 2);
+          context.ellipse(0, 26, 20, 8, 0, 0, Math.PI * 2);
+          context.fill();
+
+          const cloak = context.createRadialGradient(-3, -6, 3, 0, 0, 22);
+          cloak.addColorStop(0, "#cf9cff");
+          cloak.addColorStop(0.55, "#b86eff");
+          cloak.addColorStop(1, "#61308d");
+          context.fillStyle = cloak;
+          context.beginPath();
+          context.arc(0, 2, 17, 0, Math.PI * 2);
           context.fill();
           context.fillStyle = "#ffe7c2";
           context.beginPath();
           context.arc(0, -3, 9, 0, Math.PI * 2);
+          context.fill();
+          context.fillStyle = "#4f275f";
+          context.beginPath();
+          context.moveTo(-9, -8);
+          context.quadraticCurveTo(0, -19, 9, -8);
+          context.lineTo(8, 3);
+          context.lineTo(-8, 3);
+          context.closePath();
+          context.fill();
+          context.fillStyle = "#251029";
+          context.beginPath();
+          context.arc(-3, -4, 1.8, 0, Math.PI * 2);
+          context.arc(3, -4, 1.8, 0, Math.PI * 2);
           context.fill();
           context.fillStyle = "#5c2d7a";
           context.fillRect(-10, 10, 20, 4);
@@ -836,13 +904,29 @@ window.evilValleyInn = {
       }
 
       if (state.level.calf) {
-        context.fillStyle = state.level.calf.rescued ? "#d4ff7d" : "#fff4e0";
+        const calfGlow = context.createRadialGradient(state.level.calf.x, state.level.calf.y + 4, 6, state.level.calf.x, state.level.calf.y + 4, 28);
+        calfGlow.addColorStop(0, state.level.calf.rescued ? "rgba(212, 255, 125, 0.24)" : "rgba(255, 235, 200, 0.18)");
+        calfGlow.addColorStop(1, "rgba(212, 255, 125, 0)");
+        context.fillStyle = calfGlow;
+        context.beginPath();
+        context.arc(state.level.calf.x, state.level.calf.y + 6, 28, 0, Math.PI * 2);
+        context.fill();
+
+        const calfBody = context.createLinearGradient(state.level.calf.x - 20, state.level.calf.y - 4, state.level.calf.x + 20, state.level.calf.y + 20);
+        calfBody.addColorStop(0, "#fffdf6");
+        calfBody.addColorStop(0.55, state.level.calf.rescued ? "#eaffc5" : "#fff4e0");
+        calfBody.addColorStop(1, "#e7dcca");
+        context.fillStyle = calfBody;
         context.beginPath();
         context.ellipse(state.level.calf.x, state.level.calf.y + 8, 20, 14, 0, 0, Math.PI * 2);
         context.fill();
         context.fillStyle = "#5b3a2d";
         context.beginPath();
         context.arc(state.level.calf.x + 15, state.level.calf.y + 1, 9, 0, Math.PI * 2);
+        context.fill();
+        context.fillStyle = "#fff8ef";
+        context.beginPath();
+        context.arc(state.level.calf.x + 18, state.level.calf.y + 2, 4, 0, Math.PI * 2);
         context.fill();
         context.strokeStyle = state.level.calf.rescued ? "rgba(212, 255, 125, 0.8)" : "rgba(255, 170, 120, 0.8)";
         context.lineWidth = 3;
@@ -871,14 +955,53 @@ window.evilValleyInn = {
         context.fill();
       }
 
-      context.fillStyle = "#ffe2b2";
+      context.fillStyle = "rgba(10, 16, 28, 0.22)";
+      context.beginPath();
+      context.ellipse(0, 32, 24, 8, 0, 0, Math.PI * 2);
+      context.fill();
+
+      const face = context.createRadialGradient(-4, -14, 4, 0, -10, 18);
+      face.addColorStop(0, "#fff0cf");
+      face.addColorStop(1, "#ffe2b2");
+      context.fillStyle = face;
       context.beginPath();
       context.arc(0, -10, 14, 0, Math.PI * 2);
       context.fill();
-      context.fillStyle = "#0f2238";
-      context.fillRect(-14, 4, 28, 22);
+
+      const hair = context.createLinearGradient(-12, -28, 12, -4);
+      hair.addColorStop(0, "#252233");
+      hair.addColorStop(1, "#0f2238");
+      context.fillStyle = hair;
+      context.beginPath();
+      context.moveTo(-14, -12);
+      context.quadraticCurveTo(-8, -28, 4, -24);
+      context.quadraticCurveTo(14, -18, 12, -4);
+      context.lineTo(8, 0);
+      context.lineTo(-12, 0);
+      context.closePath();
+      context.fill();
+
+      const coat = context.createLinearGradient(-16, 0, 16, 28);
+      coat.addColorStop(0, "#25456f");
+      coat.addColorStop(0.52, "#0f2238");
+      coat.addColorStop(1, "#09131f");
+      context.fillStyle = coat;
+      context.beginPath();
+      context.moveTo(-14, 4);
+      context.lineTo(14, 4);
+      context.lineTo(18, 26);
+      context.lineTo(-18, 26);
+      context.closePath();
+      context.fill();
       context.fillStyle = "#76e5ff";
-      context.fillRect(-8, 10, 16, 6);
+      context.fillRect(-8, 10, 16, 7);
+      context.fillStyle = "#d84b4b";
+      context.beginPath();
+      context.moveTo(8, 4);
+      context.quadraticCurveTo(20, 8, 16, 18);
+      context.quadraticCurveTo(10, 12, 6, 10);
+      context.closePath();
+      context.fill();
       context.fillStyle = "#ff926a";
       context.fillRect(-11, 26, 8, 16);
       context.fillRect(3, 26, 8, 16);
@@ -886,6 +1009,17 @@ window.evilValleyInn = {
       context.beginPath();
       context.arc(-5, -12, 2, 0, Math.PI * 2);
       context.arc(5, -12, 2, 0, Math.PI * 2);
+      context.fill();
+
+      context.strokeStyle = "#2c1f1b";
+      context.lineWidth = 1.8;
+      context.beginPath();
+      context.arc(0, -7, 5.4, 0.2, Math.PI - 0.2);
+      context.stroke();
+
+      context.fillStyle = "rgba(255, 255, 255, 0.16)";
+      context.beginPath();
+      context.arc(-3, -14, 4, 0, Math.PI * 2);
       context.fill();
 
       context.restore();

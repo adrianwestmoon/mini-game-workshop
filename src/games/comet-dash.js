@@ -628,6 +628,15 @@ window.cometDash = {
       context.translate(state.player.x, state.player.y);
 
       const exhaustAlpha = 0.5 + Math.sin(state.pulseTimer * 22) * 0.18;
+      const exhaustGlow = context.createRadialGradient(0, 24, 2, 0, 24, 24);
+      exhaustGlow.addColorStop(0, `rgba(255, 208, 144, ${exhaustAlpha})`);
+      exhaustGlow.addColorStop(0.55, `rgba(255, 148, 108, ${exhaustAlpha * 0.86})`);
+      exhaustGlow.addColorStop(1, "rgba(255, 148, 108, 0)");
+      context.fillStyle = exhaustGlow;
+      context.beginPath();
+      context.arc(0, 26, 24, 0, Math.PI * 2);
+      context.fill();
+
       context.fillStyle = `rgba(255, 148, 108, ${exhaustAlpha})`;
       context.beginPath();
       context.moveTo(-7, 18);
@@ -636,7 +645,11 @@ window.cometDash = {
       context.closePath();
       context.fill();
 
-      context.fillStyle = state.player.invulnerable > 0 ? "rgba(255, 209, 156, 0.95)" : "#7ef0ff";
+      const hull = context.createLinearGradient(-18, -20, 18, 18);
+      hull.addColorStop(0, state.player.invulnerable > 0 ? "rgba(255, 244, 220, 0.98)" : "#d9fbff");
+      hull.addColorStop(0.4, state.player.invulnerable > 0 ? "rgba(255, 216, 166, 0.96)" : "#7ef0ff");
+      hull.addColorStop(1, state.player.invulnerable > 0 ? "rgba(255, 170, 122, 0.95)" : "#1782af");
+      context.fillStyle = hull;
       context.beginPath();
       context.moveTo(0, -24);
       context.lineTo(17, 14);
@@ -647,9 +660,32 @@ window.cometDash = {
       context.closePath();
       context.fill();
 
+      context.fillStyle = "rgba(255, 255, 255, 0.18)";
+      context.beginPath();
+      context.moveTo(0, -21);
+      context.lineTo(10, 6);
+      context.lineTo(0, 1);
+      context.lineTo(-10, 6);
+      context.closePath();
+      context.fill();
+
+      context.fillStyle = "#0f2b45";
+      context.beginPath();
+      context.moveTo(0, -12);
+      context.lineTo(8, 6);
+      context.lineTo(0, 14);
+      context.lineTo(-8, 6);
+      context.closePath();
+      context.fill();
+
       context.fillStyle = "#f4fbff";
       context.beginPath();
       context.arc(0, -3, 5, 0, Math.PI * 2);
+      context.fill();
+
+      context.fillStyle = "rgba(255, 255, 255, 0.55)";
+      context.beginPath();
+      context.arc(-2, -5, 2, 0, Math.PI * 2);
       context.fill();
 
       context.strokeStyle = "rgba(213, 255, 101, 0.55)";
@@ -697,7 +733,11 @@ window.cometDash = {
         context.translate(enemy.x, enemy.y);
         context.rotate(enemy.angle);
 
-        context.fillStyle = enemy.type === "spinner" ? "#ff9a69" : "#c147ff";
+        const body = context.createLinearGradient(-enemy.radius, -enemy.radius, enemy.radius, enemy.radius);
+        body.addColorStop(0, enemy.type === "spinner" ? "#ffd0b2" : "#f0afff");
+        body.addColorStop(0.45, enemy.type === "spinner" ? "#ff9a69" : "#c147ff");
+        body.addColorStop(1, enemy.type === "spinner" ? "#a4422d" : "#55108b");
+        context.fillStyle = body;
         context.beginPath();
         context.moveTo(0, -enemy.radius);
         context.lineTo(enemy.radius * 0.9, enemy.radius * 0.5);
@@ -706,10 +746,28 @@ window.cometDash = {
         context.closePath();
         context.fill();
 
+        context.fillStyle = "rgba(255, 255, 255, 0.18)";
+        context.beginPath();
+        context.moveTo(0, -enemy.radius + 4);
+        context.lineTo(enemy.radius * 0.52, enemy.radius * 0.14);
+        context.lineTo(0, enemy.radius * 0.02);
+        context.lineTo(-enemy.radius * 0.52, enemy.radius * 0.14);
+        context.closePath();
+        context.fill();
+
         context.fillStyle = "rgba(255, 246, 212, 0.9)";
         context.beginPath();
         context.arc(0, -enemy.radius * 0.2, enemy.radius * 0.24, 0, Math.PI * 2);
         context.fill();
+
+        context.strokeStyle = enemy.type === "spinner" ? "rgba(255, 214, 174, 0.82)" : "rgba(225, 173, 255, 0.82)";
+        context.lineWidth = 2.2;
+        context.beginPath();
+        context.moveTo(-enemy.radius * 0.76, enemy.radius * 0.42);
+        context.lineTo(-enemy.radius * 1.12, enemy.radius * 0.66);
+        context.moveTo(enemy.radius * 0.76, enemy.radius * 0.42);
+        context.lineTo(enemy.radius * 1.12, enemy.radius * 0.66);
+        context.stroke();
 
         context.restore();
       }

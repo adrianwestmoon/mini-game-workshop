@@ -547,14 +547,54 @@ window.mooMission = {
         context.translate(screenX, enemy.y);
         context.scale(enemy.direction, 1);
 
-        context.fillStyle = "#6a3d26";
+        const shadow = context.createRadialGradient(0, 18, 4, 0, 18, 18);
+        shadow.addColorStop(0, "rgba(24, 14, 8, 0.32)");
+        shadow.addColorStop(1, "rgba(24, 14, 8, 0)");
+        context.fillStyle = shadow;
+        context.beginPath();
+        context.ellipse(0, 18, 22, 8, 0, 0, Math.PI * 2);
+        context.fill();
+
+        const body = context.createLinearGradient(-18, -6, 18, 18);
+        body.addColorStop(0, "#bb8a58");
+        body.addColorStop(0.5, "#8d5b35");
+        body.addColorStop(1, "#60391f");
+        context.fillStyle = body;
         context.beginPath();
         context.ellipse(0, 8, 18, 12, 0, 0, Math.PI * 2);
         context.fill();
 
-        context.fillStyle = "#8d5b35";
+        context.fillStyle = "rgba(255, 255, 255, 0.14)";
+        context.beginPath();
+        context.ellipse(-3, 4, 9, 5, -0.18, 0, Math.PI * 2);
+        context.fill();
+
+        const head = context.createRadialGradient(7, 0, 2, 10, 2, 12);
+        head.addColorStop(0, "#c99866");
+        head.addColorStop(0.55, "#8d5b35");
+        head.addColorStop(1, "#5a341f");
+        context.fillStyle = head;
         context.beginPath();
         context.arc(10, 2, 10, 0, Math.PI * 2);
+        context.fill();
+
+        context.fillStyle = "#f7e5c8";
+        context.beginPath();
+        context.arc(15, 2, 4, 0, Math.PI * 2);
+        context.fill();
+        context.fillStyle = "#22170f";
+        context.beginPath();
+        context.arc(13, 0, 1.4, 0, Math.PI * 2);
+        context.fill();
+        context.arc(17, 0, 1.4, 0, Math.PI * 2);
+        context.fill();
+
+        context.fillStyle = "#774b2d";
+        context.beginPath();
+        context.moveTo(16, -6);
+        context.lineTo(21, -12);
+        context.lineTo(18, -4);
+        context.closePath();
         context.fill();
 
         context.fillStyle = "#fff5de";
@@ -595,7 +635,19 @@ window.mooMission = {
       context.translate(screenX, state.player.y);
       context.scale(state.player.facing, 1);
 
-      context.fillStyle = "#fff7eb";
+      const shadow = context.createRadialGradient(2, 26, 4, 2, 26, 26);
+      shadow.addColorStop(0, "rgba(38, 24, 18, 0.28)");
+      shadow.addColorStop(1, "rgba(38, 24, 18, 0)");
+      context.fillStyle = shadow;
+      context.beginPath();
+      context.ellipse(2, 27, 28, 9, 0, 0, Math.PI * 2);
+      context.fill();
+
+      const coat = context.createLinearGradient(-24, -4, 22, 28);
+      coat.addColorStop(0, "#fffdf5");
+      coat.addColorStop(0.48, "#fff7eb");
+      coat.addColorStop(1, "#e6ddcf");
+      context.fillStyle = coat;
       context.beginPath();
       context.ellipse(0, 10, 24, 17, 0, 0, Math.PI * 2);
       context.fill();
@@ -609,6 +661,11 @@ window.mooMission = {
       context.fillStyle = "#fff7eb";
       context.beginPath();
       context.arc(18, -1, 12, 0, Math.PI * 2);
+      context.fill();
+
+      context.fillStyle = "#fff7eb";
+      context.beginPath();
+      context.ellipse(20, 0, 10, 8, 0, 0, Math.PI * 2);
       context.fill();
 
       context.fillStyle = "#ffb8c8";
@@ -625,6 +682,8 @@ window.mooMission = {
       context.beginPath();
       context.arc(21, -3, 1.8, 0, Math.PI * 2);
       context.fill();
+      context.arc(26, -1, 1.3, 0, Math.PI * 2);
+      context.fill();
 
       context.fillStyle = "#f08c67";
       context.beginPath();
@@ -634,11 +693,20 @@ window.mooMission = {
       context.fillStyle = "#d44747";
       context.fillRect(-6, 1, 18, 5);
 
+      context.fillStyle = "rgba(255, 255, 255, 0.3)";
+      context.fillRect(-6, 1, 7, 5);
+
       context.fillStyle = "#fff5de";
       context.fillRect(-12, 22, 4, 12);
       context.fillRect(-2, 22, 4, 12);
       context.fillRect(8, 22, 4, 12);
       context.fillRect(18, 22, 4, 12);
+
+      context.fillStyle = "#5b3a2d";
+      context.beginPath();
+      context.arc(-8, -2, 4, 0, Math.PI * 2);
+      context.arc(4, 18, 3, 0, Math.PI * 2);
+      context.fill();
 
       context.strokeStyle = "#5b3a2d";
       context.lineWidth = 3;
@@ -646,6 +714,11 @@ window.mooMission = {
       context.moveTo(-22, 2);
       context.lineTo(-30, -4 + Math.sin(state.elapsed * 12) * 2);
       context.stroke();
+
+      context.fillStyle = "rgba(255, 255, 255, 0.2)";
+      context.beginPath();
+      context.ellipse(-4, 4, 10, 5, -0.12, 0, Math.PI * 2);
+      context.fill();
 
       context.restore();
     }

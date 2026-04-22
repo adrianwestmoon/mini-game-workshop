@@ -1,4 +1,4 @@
-const APP_BUILD = "2026.04.22-owl-touch-artfix";
+const APP_BUILD = "2026.04.22-character-polish";
 const CAMPAIGN_PROGRESS_KEY = "mini-game-workshop:campaign-progress";
 
 const CAMPAIGN_CHAPTERS = [
